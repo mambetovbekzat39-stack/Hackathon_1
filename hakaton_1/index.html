@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Космические пары</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Comic Sans MS', 'Arial Rounded MT Bold', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0b0b2d 0%, #1a1a4a 50%, #0b0b2d 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        /* Звездный фон */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .star {
+            position: absolute;
+            background-color: white;
+            border-radius: 50%;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            text-align: center;
+            z-index: 1;
+        }
+
+        header {
+            margin: 20px 0;
+            position: relative;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            color: #ffcc00;
+            text-shadow: 0 0 10px #ff9900, 0 0 20px #ff6600;
+            animation: glow 2s infinite alternate;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 10px #ff9900, 0 0 20px #ff6600; }
+            to { text-shadow: 0 0 15px #ffcc00, 0 0 30px #ff9900, 0 0 40px #ff6600; }
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            color: #aadcff;
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 25px;
+            background: rgba(16, 30, 66, 0.7);
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(100, 150, 255, 0.3);
+            border: 2px solid #4a6fff;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .info-label {
+            font-size: 1rem;
+            color: #aadcff;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #ffcc00;
+            text-shadow: 0 0 5px rgba(255, 204, 0, 0.5);
+        }
+
+        .time-warning {
+            color: #ff6b6b;
+            animation: pulse 1s infinite;
+        }
+
+        .time-critical {
+            color: #ff0000;
+            animation: pulse 0.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin: 0 auto 25px;
+            perspective: 1000px;
+        }
+
+        @media (max-width: 700px) {
+            .game-board {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 500px) {
+            .game-board {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .card {
+            height: 140px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+            cursor: pointer;
+        }
+
+        .card.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card.matched .card-front {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            box-shadow: 0 0 20px #2ecc71;
+        }
+
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s;
+        }
+
+        .card-front {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            transform: rotateY(180deg);
+            font-size: 3.5rem;
+        }
+
+        .card-back {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            color: white;
+            font-size: 2rem;
+            overflow: hidden;
+        }
+
+        .card-back::before {
+            content: "🚀";
+            position: absolute;
+            font-size: 2.5rem;
+            opacity: 0.7;
+        }
+
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 14px 28px;
+            background: linear-gradient(135deg, #ff9a00, #ff6b00);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(255, 107, 0, 0.4);
+            font-weight: bold;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 107, 0, 0.6);
+        }
+
+        .difficulty {
+            margin: 20px 0;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .difficulty button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            background: linear-gradient(135deg, #4a6fff, #3a5fef);
+        }
+
+        .difficulty button.active {
+            background: linear-gradient(135deg, #ffcc00, #ff9900);
+            box-shadow: 0 0 15px #ffcc00;
+        }
+
+        .win-message {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s;
+        }
+
+        .win-message.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .lose-message {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s;
+        }
+
+        .lose-message.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .win-content, .lose-content {
+            background: linear-gradient(135deg, #1a237e, #283593);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            color: white;
+            max-width: 90%;
+            box-shadow: 0 0 40px rgba(100, 150, 255, 0.7);
+            border: 3px solid #4a6fff;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .win-content::before, .lose-content::before {
+            content: "✨";
+            position: absolute;
+            font-size: 5rem;
+            top: -20px;
+            left: -20px;
+            opacity: 0.5;
+        }
+
+        .win-content::after, .lose-content::after {
+            content: "🌟";
+            position: absolute;
+            font-size: 5rem;
+            bottom: -20px;
+            right: -20px;
+            opacity: 0.5;
+        }
+
+        .lose-content {
+            border: 3px solid #ff6b6b;
+        }
+
+        .lose-content::before {
+            content: "💥";
+        }
+
+        .lose-content::after {
+            content: "😵";
+        }
+
+        .win-content h2, .lose-content h2 {
+            margin-bottom: 20px;
+            color: #ffcc00;
+            font-size: 2.5rem;
+            text-shadow: 0 0 10px rgba(255, 204, 0, 0.7);
+        }
+
+        .lose-content h2 {
+            color: #ff6b6b;
+        }
+
+        .win-content p, .lose-content p {
+            margin-bottom: 25px;
+            font-size: 1.3rem;
+            line-height: 1.5;
+        }
+
+        .rocket {
+            position: fixed;
+            bottom: -100px;
+            right: 10%;
+            font-size: 4rem;
+            transform: rotate(45deg);
+            z-index: 0;
+            animation: fly 15s linear infinite;
+        }
+
+        @keyframes fly {
+            0% {
+                bottom: -100px;
+                right: 10%;
+                transform: rotate(45deg);
+            }
+            25% {
+                bottom: 30%;
+                right: 80%;
+                transform: rotate(90deg);
+            }
+            50% {
+                bottom: 80%;
+                right: 50%;
+                transform: rotate(180deg);
+            }
+            75% {
+                bottom: 50%;
+                right: 10%;
+                transform: rotate(270deg);
+            }
+            100% {
+                bottom: -100px;
+                right: 10%;
+                transform: rotate(405deg);
+            }
+        }
+
+        .planet {
+            position: fixed;
+            top: 15%;
+            left: 5%;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle at 30% 30%, #ff9966, #ff5e62);
+            border-radius: 50%;
+            box-shadow: 0 0 30px #ff5e62;
+            z-index: 0;
+        }
+
+        .alien {
+            position: fixed;
+            bottom: 20%;
+            left: 10%;
+            font-size: 3rem;
+            z-index: 0;
+            animation: float 4s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .ufo {
+            position: fixed;
+            top: 10%;
+            right: 15%;
+            font-size: 3rem;
+            z-index: 0;
+            animation: hover 5s ease-in-out infinite;
+        }
+
+        @keyframes hover {
+            0%, 100% { transform: translateX(0) translateY(0); }
+            25% { transform: translateX(10px) translateY(-10px); }
+            50% { transform: translateX(0) translateY(-20px); }
+            75% { transform: translateX(-10px) translateY(-10px); }
+        }
+        
+        /* Начальный экран */
+        .start-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            transition: opacity 0.5s;
+        }
+
+        .start-content {
+            background: linear-gradient(135deg, #1a237e, #283593);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            color: white;
+            max-width: 90%;
+            box-shadow: 0 0 40px rgba(100, 150, 255, 0.7);
+            border: 3px solid #4a6fff;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .start-content::before {
+            content: "✨";
+            position: absolute;
+            font-size: 5rem;
+            top: -20px;
+            left: -20px;
+            opacity: 0.5;
+        }
+
+        .start-content::after {
+            content: "🌟";
+            position: absolute;
+            font-size: 5rem;
+            bottom: -20px;
+            right: -20px;
+            opacity: 0.5;
+        }
+
+        .start-content h2 {
+            margin-bottom: 20px;
+            color: #ffcc00;
+            font-size: 2.5rem;
+            text-shadow: 0 0 10px rgba(255, 204, 0, 0.7);
+        }
+
+        .start-content p {
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            line-height: 1.5;
+            text-align: left;
+        }
+
+        .instructions {
+            margin: 20px 0;
+            text-align: left;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .instructions h3 {
+            color: #ffcc00;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        /* Кнопка звука */
+        .sound-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(16, 30, 66, 0.7);
+            border: 2px solid #4a6fff;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            font-size: 1.5rem;
+            color: #ffcc00;
+            box-shadow: 0 0 10px rgba(100, 150, 255, 0.5);
+        }
+        
+        .sound-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        .time-limit-info {
+            background: rgba(255, 107, 107, 0.2);
+            padding: 10px;
+            border-radius: 10px;
+            margin: 10px 0;
+            border: 2px solid #ff6b6b;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #2ecc71, #27ae60);
+            border-radius: 5px;
+            transition: width 0.3s;
+        }
+
+        .progress-warning {
+            background: linear-gradient(90deg, #ffcc00, #ff9900);
+        }
+
+        .progress-critical {
+            background: linear-gradient(90deg, #ff6b6b, #ff0000);
+        }
+    </style>
+</head>
+<body>
+    <div class="stars" id="stars"></div>
+    
+    <div class="planet"></div>
+    <div class="alien">👽</div>
+    <div class="ufo">🛸</div>
+    <div class="rocket">🚀</div>
+    
+    <!-- Кнопка переключения звука -->
+    <div class="sound-toggle" id="sound-toggle">
+        🔊
+    </div>
+    
+    <!-- Начальный экран -->
+    <div class="start-screen" id="start-screen">
+        <div class="start-content">
+            <h1>Космические пары</h1>
+            <p>Отправляйся в увлекательное космическое путешествие и найди все пары!</p>
+            
+            <div class="instructions">
+                <h3>Как играть:</h3>
+                <p>1. Нажимай на карточки, чтобы перевернуть их</p>
+                <p>2. Найди две одинаковые карточки</p>
+                <p>3. Открой все пары как можно быстрее и с меньшим количеством ходов</p>
+                <p>4. На среднем уровне: 12 пар за 45 секунд ⚡</p>
+                <p>5. На сложном уровне: 16 пар за 60 секунд ⏰</p>
+                <p>6. На легком уровне: без ограничения времени</p>
+            </div>
+            
+            <button id="start-game">Начать игру</button>
+        </div>
+    </div>
+    
+    <div class="container" id="game-container" style="display: none;">
+        <header>
+            <h1>Космические пары</h1>
+            <p class="subtitle">Найди одинаковые космические объекты!</p>
+        </header>
+        
+        <div class="game-info">
+            <div class="info-item">
+                <span class="info-label">Ходы</span>
+                <span class="info-value" id="moves">0</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Осталось пар</span>
+                <span class="info-value" id="pairs-left">8</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Время</span>
+                <span class="info-value" id="timer">0</span>
+            </div>
+        </div>
+
+        <div class="time-limit-info" id="time-limit-info" style="display: none;">
+            <p id="time-limit-text">⏰ Ограничение времени: <strong id="time-limit">0</strong> секунд</p>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill" style="width: 100%"></div>
+            </div>
+        </div>
+        
+        <div class="difficulty">
+            <button id="easy" class="active">Легко (8 пар)</button>
+            <button id="medium">Средне (12 пар) ⚡ 45с</button>
+            <button id="hard">Сложно (16 пар) ⏰ 60с</button>
+        </div>
+        
+        <div class="game-board" id="game-board"></div>
+        
+        <div class="controls">
+            <button id="restart">Новая игра</button>
+        </div>
+    </div>
+    
+    <div class="win-message" id="win-message">
+        <div class="win-content">
+            <h2>Поздравляем, космонавт! 🎉</h2>
+            <p>Ты нашёл все космические пары!</p>
+            <p>За <span id="final-moves">0</span> ходов и <span id="final-time">0</span> секунд!</p>
+            <p>Ты настоящий герой галактики! 👨‍🚀👩‍🚀</p>
+            <button id="play-again">Играть снова</button>
+        </div>
+    </div>
+
+    <div class="lose-message" id="lose-message">
+        <div class="lose-content">
+            <h2>Время вышло! 💥</h2>
+            <p>Ты не успел найти все пары за отведенное время.</p>
+            <p>Найденных пар: <span id="found-pairs">0</span> из <span id="total-pairs">12</span></p>
+            <p>Попробуй еще раз - у тебя обязательно получится! 🚀</p>
+            <button id="try-again">Попробовать снова</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Создание звездного фона
+            function createStars() {
+                const starsContainer = document.getElementById('stars');
+                const starCount = 150;
+                
+                for (let i = 0; i < starCount; i++) {
+                    const star = document.createElement('div');
+                    star.className = 'star';
+                    
+                    const size = Math.random() * 3;
+                    star.style.width = `${size}px`;
+                    star.style.height = `${size}px`;
+                    
+                    star.style.left = `${Math.random() * 100}%`;
+                    star.style.top = `${Math.random() * 100}%`;
+                    
+                    star.style.animation = `twinkle ${Math.random() * 5 + 3}s infinite alternate`;
+                    
+                    starsContainer.appendChild(star);
+                }
+                
+                // Добавляем стили для мерцания звезд
+                const style = document.createElement('style');
+                style.textContent = `
+                    @keyframes twinkle {
+                        0% { opacity: 0.2; }
+                        100% { opacity: 1; }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+            
+            // Элементы DOM
+            const startScreen = document.getElementById('start-screen');
+            const gameContainer = document.getElementById('game-container');
+            const startButton = document.getElementById('start-game');
+            const gameBoard = document.getElementById('game-board');
+            const movesDisplay = document.getElementById('moves');
+            const pairsLeftDisplay = document.getElementById('pairs-left');
+            const timerDisplay = document.getElementById('timer');
+            const restartButton = document.getElementById('restart');
+            const winMessage = document.getElementById('win-message');
+            const loseMessage = document.getElementById('lose-message');
+            const finalMoves = document.getElementById('final-moves');
+            const finalTime = document.getElementById('final-time');
+            const playAgainButton = document.getElementById('play-again');
+            const tryAgainButton = document.getElementById('try-again');
+            const foundPairs = document.getElementById('found-pairs');
+            const totalPairs = document.getElementById('total-pairs');
+            const difficultyButtons = document.querySelectorAll('.difficulty button');
+            const soundToggle = document.getElementById('sound-toggle');
+            const timeLimitInfo = document.getElementById('time-limit-info');
+            const timeLimitText = document.getElementById('time-limit-text');
+            const timeLimitDisplay = document.getElementById('time-limit');
+            const progressFill = document.getElementById('progress-fill');
+            
+            // Переменные игры
+            let cards = [];
+            let flippedCards = [];
+            let moves = 0;
+            let pairsFound = 0;
+            let totalPairsCount = 8;
+            let timer = 0;
+            let timerInterval;
+            let gameStarted = false;
+            let soundEnabled = true;
+            let timeLimit = 0; // 0 - без ограничения, >0 - ограничение в секундах
+            let currentDifficulty = 'easy';
+            
+            // Космические эмодзи для карточек
+            const symbols = ['🚀', '🛸', '👽', '🌍', '🌕', '⭐', '🪐', '☄️', '👨‍🚀', '👩‍🚀', '🔭', '🛰️', '💫', '🌌', '🪙', '⚡'];
+            
+            // Создание звуков
+            function createAudioContext() {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                return new AudioContext();
+            }
+            
+            // Функция для создания звуков
+            function playSound(frequency, duration, type = 'sine') {
+                if (!soundEnabled) return;
+                
+                try {
+                    const audioCtx = createAudioContext();
+                    const oscillator = audioCtx.createOscillator();
+                    const gainNode = audioCtx.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioCtx.destination);
+                    
+                    oscillator.frequency.value = frequency;
+                    oscillator.type = type;
+                    
+                    gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+                    
+                    oscillator.start(audioCtx.currentTime);
+                    oscillator.stop(audioCtx.currentTime + duration);
+                } catch (e) {
+                    console.log('Аудио не поддерживается');
+                }
+            }
+            
+            // Звуки для различных событий
+            function playFlipSound() {
+                playSound(523.25, 0.3, 'sine'); // Нота C
+            }
+            
+            function playMatchSound() {
+                playSound(659.25, 0.5, 'square'); // Нота E
+                setTimeout(() => playSound(783.99, 0.3, 'square'), 200); // Нота G
+            }
+            
+            function playWinSound() {
+                const notes = [523.25, 659.25, 783.99, 1046.50]; // C, E, G, C
+                notes.forEach((note, index) => {
+                    setTimeout(() => playSound(note, 0.4, 'sine'), index * 200);
+                });
+            }
+            
+            function playLoseSound() {
+                const notes = [523.25, 493.88, 440.00, 392.00]; // C, B, A, G
+                notes.forEach((note, index) => {
+                    setTimeout(() => playSound(note, 0.3, 'sawtooth'), index * 150);
+                });
+            }
+            
+            function playButtonSound() {
+                playSound(392.00, 0.2, 'triangle'); // Нота G
+            }
+            
+            function playTimeWarningSound() {
+                playSound(220.00, 0.5, 'sawtooth'); // Низкая нота A
+            }
+            
+            function playCriticalTimeSound() {
+                playSound(165.00, 0.3, 'square'); // Очень низкая нота E
+                setTimeout(() => playSound(130.81, 0.3, 'square'), 150); // Нота C
+            }
+            
+            // Инициализация игры
+            function initGame() {
+                // Очистка игрового поля
+                gameBoard.innerHTML = '';
+                cards = [];
+                flippedCards = [];
+                moves = 0;
+                pairsFound = 0;
+                timer = 0;
+                gameStarted = false;
+                
+                // Обновление отображения
+                movesDisplay.textContent = moves;
+                pairsLeftDisplay.textContent = totalPairsCount;
+                timerDisplay.textContent = timer;
+                timerDisplay.className = 'info-value';
+                progressFill.className = 'progress-fill';
+                
+                // Остановка таймера
+                clearInterval(timerInterval);
+                
+                // Скрытие сообщений
+                winMessage.classList.remove('show');
+                loseMessage.classList.remove('show');
+                
+                // Настройка ограничения времени для разных уровней
+                if (currentDifficulty === 'medium') {
+                    timeLimit = 45; // 45 секунд на среднем уровне
+                    timeLimitInfo.style.display = 'block';
+                    timeLimitDisplay.textContent = timeLimit;
+                    timeLimitText.innerHTML = '⚡ На среднем уровне: <strong>45 секунд</strong>';
+                    progressFill.style.width = '100%';
+                } else if (currentDifficulty === 'hard') {
+                    timeLimit = 60; // 60 секунд на сложном уровне
+                    timeLimitInfo.style.display = 'block';
+                    timeLimitDisplay.textContent = timeLimit;
+                    timeLimitText.innerHTML = '⏰ На сложном уровне: <strong>60 секунд</strong>';
+                    progressFill.style.width = '100%';
+                } else {
+                    timeLimit = 0; // Без ограничения на легком уровне
+                    timeLimitInfo.style.display = 'none';
+                }
+                
+                // Создание карточек
+                const selectedSymbols = symbols.slice(0, totalPairsCount);
+                const cardValues = [...selectedSymbols, ...selectedSymbols];
+                
+                // Перемешивание карточек
+                shuffleArray(cardValues);
+                
+                // Создание сетки карточек
+                const columns = Math.min(totalPairsCount, 4);
+                gameBoard.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
+                
+                // Создание карточек
+                cardValues.forEach((value, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.dataset.value = value;
+                    card.dataset.index = index;
+                    
+                    const cardFront = document.createElement('div');
+                    cardFront.className = 'card-front';
+                    cardFront.textContent = value;
+                    
+                    const cardBack = document.createElement('div');
+                    cardBack.className = 'card-back';
+                    
+                    card.appendChild(cardFront);
+                    card.appendChild(cardBack);
+                    
+                    card.addEventListener('click', flipCard);
+                    gameBoard.appendChild(card);
+                    
+                    cards.push(card);
+                });
+            }
+            
+            // Перемешивание массива
+            function shuffleArray(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+                return array;
+            }
+            
+            // Переворот карточки
+            function flipCard() {
+                // Если игра не начата, запускаем таймер
+                if (!gameStarted) {
+                    startTimer();
+                    gameStarted = true;
+                }
+                
+                // Если уже перевернуто 2 карточки или эта карточка уже перевернута
+                if (flippedCards.length === 2 || this.classList.contains('flipped') || this.classList.contains('matched')) {
+                    return;
+                }
+                
+                // Воспроизводим звук переворота
+                playFlipSound();
+                
+                // Переворачиваем карточку
+                this.classList.add('flipped');
+                flippedCards.push(this);
+                
+                // Если перевернуто 2 карточки, проверяем на совпадение
+                if (flippedCards.length === 2) {
+                    moves++;
+                    movesDisplay.textContent = moves;
+                    
+                    checkForMatch();
+                }
+            }
+            
+            // Проверка на совпадение
+            function checkForMatch() {
+                const [card1, card2] = flippedCards;
+                const isMatch = card1.dataset.value === card2.dataset.value;
+                
+                if (isMatch) {
+                    card1.classList.add('matched');
+                    card2.classList.add('matched');
+                    pairsFound++;
+                    pairsLeftDisplay.textContent = totalPairsCount - pairsFound;
+                    
+                    // Воспроизводим звук совпадения
+                    playMatchSound();
+                    
+                    // Добавляем эффект при нахождении пары
+                    createConfetti();
+                    
+                    // Проверка на победу
+                    if (pairsFound === totalPairsCount) {
+                        endGame(true);
+                    }
+                    
+                    flippedCards = [];
+                } else {
+                    setTimeout(() => {
+                        card1.classList.remove('flipped');
+                        card2.classList.remove('flipped');
+                        flippedCards = [];
+                    }, 1000);
+                }
+            }
+            
+            // Запуск таймера
+            function startTimer() {
+                clearInterval(timerInterval);
+                timerInterval = setInterval(() => {
+                    timer++;
+                    timerDisplay.textContent = timer;
+                    
+                    // Обновление прогресс-бара
+                    if (timeLimit > 0) {
+                        const timeLeft = timeLimit - timer;
+                        const progress = (timeLeft / timeLimit) * 100;
+                        progressFill.style.width = `${progress}%`;
+                        
+                        // Изменение цвета прогресс-бара
+                        if (progress <= 25) {
+                            progressFill.className = 'progress-fill progress-critical';
+                        } else if (progress <= 50) {
+                            progressFill.className = 'progress-fill progress-warning';
+                        }
+                    }
+                    
+                    // Проверка ограничения времени
+                    if (timeLimit > 0 && timer >= timeLimit) {
+                        endGame(false);
+                    }
+                    
+                    // Предупреждение за 10 секунд до конца
+                    if (timeLimit > 0 && timer === timeLimit - 10) {
+                        timerDisplay.classList.add('time-warning');
+                        playTimeWarningSound();
+                    }
+                    
+                    // Критическое предупреждение за 5 секунд до конца
+                    if (timeLimit > 0 && timer === timeLimit - 5) {
+                        timerDisplay.classList.remove('time-warning');
+                        timerDisplay.classList.add('time-critical');
+                        playCriticalTimeSound();
+                    }
+                }, 1000);
+            }
+            
+            // Завершение игры
+            function endGame(isWin) {
+                clearInterval(timerInterval);
+                
+                if (isWin) {
+                    // Воспроизводим звук победы
+                    playWinSound();
+                    
+                    // Показ сообщения о победе
+                    finalMoves.textContent = moves;
+                    finalTime.textContent = timer;
+                    setTimeout(() => {
+                        winMessage.classList.add('show');
+                    }, 800);
+                } else {
+                    // Воспроизводим звук поражения
+                    playLoseSound();
+                    
+                    // Показ сообщения о поражении
+                    foundPairs.textContent = pairsFound;
+                    totalPairs.textContent = totalPairsCount;
+                    setTimeout(() => {
+                        loseMessage.classList.add('show');
+                    }, 800);
+                }
+            }
+            
+            // Установка сложности
+            function setDifficulty(level) {
+                difficultyButtons.forEach(btn => btn.classList.remove('active'));
+                event.target.classList.add('active');
+                currentDifficulty = level;
+                
+                if (level === 'easy') {
+                    totalPairsCount = 8;
+                } else if (level === 'medium') {
+                    totalPairsCount = 12;
+                } else if (level === 'hard') {
+                    totalPairsCount = 16;
+                }
+                
+                initGame();
+            }
+            
+            // Создание конфетти при нахождении пары
+            function createConfetti() {
+                for (let i = 0; i < 20; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.innerHTML = ['⭐', '✨', '🌟', '💫'][Math.floor(Math.random() * 4)];
+                    confetti.style.position = 'fixed';
+                    confetti.style.fontSize = (Math.random() * 20 + 10) + 'px';
+                    confetti.style.left = Math.random() * 100 + 'vw';
+                    confetti.style.top = '-50px';
+                    confetti.style.zIndex = '9999';
+                    confetti.style.animation = `fall ${Math.random() * 3 + 2}s linear forwards`;
+                    
+                    document.body.appendChild(confetti);
+                    
+                    // Удаляем конфетти после анимации
+                    setTimeout(() => {
+                        confetti.remove();
+                    }, 5000);
+                }
+                
+                // Добавляем стили для падения конфетти
+                if (!document.getElementById('confetti-style')) {
+                    const style = document.createElement('style');
+                    style.id = 'confetti-style';
+                    style.textContent = `
+                        @keyframes fall {
+                            to {
+                                transform: translateY(100vh) rotate(${Math.random() * 360}deg);
+                            }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+            }
+            
+            // Функция запуска игры
+            function startGame() {
+                playButtonSound();
+                startScreen.style.display = 'none';
+                gameContainer.style.display = 'block';
+                initGame();
+            }
+            
+            // Переключение звука
+            function toggleSound() {
+                soundEnabled = !soundEnabled;
+                soundToggle.textContent = soundEnabled ? '🔊' : '🔈';
+                playButtonSound();
+            }
+            
+            // Обработчики событий
+            startButton.addEventListener('click', startGame);
+            restartButton.addEventListener('click', () => {
+                playButtonSound();
+                initGame();
+            });
+            playAgainButton.addEventListener('click', () => {
+                playButtonSound();
+                winMessage.classList.remove('show');
+                initGame();
+            });
+            tryAgainButton.addEventListener('click', () => {
+                playButtonSound();
+                loseMessage.classList.remove('show');
+                initGame();
+            });
+            soundToggle.addEventListener('click', toggleSound);
+            
+            difficultyButtons.forEach(button => {
+                button.addEventListener('click', (event) => {
+                    playButtonSound();
+                    setDifficulty(event.target.id);
+                });
+            });
+            
+            // Начальная инициализация
+            createStars();
+        });
+    </script>
+</body>
+</html>
