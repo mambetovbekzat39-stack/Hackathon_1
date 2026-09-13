@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Трекер трекеров</title>
+  <meta name="description" content="Отмечай привычки и дела каждый день — сделал или нет" />
+
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#10121a" />
+  <link rel="icon" href="icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="app__header">
+      <div class="app__header-top">
+        <div>
+          <h1 class="app__title">Трекер трекеров</h1>
+          <p class="app__date" id="headerDate"></p>
+        </div>
+        <button class="install-btn" id="installBtn" hidden>Установить</button>
+      </div>
+    </header>
+
+    <div class="week-strip" id="weekHeader"></div>
+
+    <div class="app__stats">
+      <div class="stat">
+        <div class="stat__value is-gold" id="statDone">0/0</div>
+        <div class="stat__label">сделано сегодня</div>
+      </div>
+      <div class="stat">
+        <div class="stat__value is-teal" id="statStreak">—</div>
+        <div class="stat__label">лучший стрик</div>
+      </div>
+    </div>
+
+    <div class="list" id="list"></div>
+
+    <div class="empty" id="empty">
+      <div class="empty__icon">🌙</div>
+      <div class="empty__title">Пока нет трекеров</div>
+      <div class="empty__text">Нажми «+» и добавь первое дело —<br>например «Изучаю Python: анализ»</div>
+    </div>
+  </div>
+
+  <button class="fab" id="fab" aria-label="Добавить трекер">+</button>
+
+  <div class="modal-overlay" id="overlay">
+    <div class="modal">
+      <h2 class="modal__title" id="modalTitle">Новый трекер</h2>
+      <form id="addForm">
+        <div class="field">
+          <label for="nameInput">Что отслеживаем</label>
+          <input id="nameInput" type="text" placeholder="Например: Изучаю Python — анализ" maxlength="80" required />
+        </div>
+        <div class="field">
+          <label for="timeInput">Во сколько (необязательно)</label>
+          <input id="timeInput" type="time" />
+        </div>
+        <div class="modal__actions">
+          <button type="button" class="btn ghost" id="cancelBtn">Отмена</button>
+          <button type="submit" class="btn primary" id="submitBtn">Добавить</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
