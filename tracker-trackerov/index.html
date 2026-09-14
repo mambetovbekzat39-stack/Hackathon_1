@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Трекер трекеров</title>
   <meta name="description" content="Отмечай привычки и дела каждый день — сделал или нет" />
 
@@ -23,23 +23,46 @@
           <h1 class="app__title">Трекер трекеров</h1>
           <p class="app__date" id="headerDate"></p>
         </div>
-        <button class="install-btn" id="installBtn" hidden>Установить</button>
+        <div class="header-actions">
+          <button class="icon-btn" id="statsNavBtn" aria-label="Статистика">📊</button>
+          <button class="icon-btn" id="settingsNavBtn" aria-label="Настройки">⚙️</button>
+          <button class="install-btn" id="installBtn" hidden>Установить</button>
+        </div>
       </div>
     </header>
 
+    <!-- Переключатель видов: Неделя / Месяц -->
+    <div class="view-toggle">
+      <button class="toggle-btn active" id="viewWeekBtn">Неделя</button>
+      <button class="toggle-btn" id="viewMonthBtn">Месяц</button>
+    </div>
+
+    <!-- Вид недели -->
     <div class="week-strip" id="weekHeader"></div>
 
+    <!-- Вид месяца (скрыт по умолчанию) -->
+    <div class="month-view hidden" id="monthView">
+      <div class="month-header">
+        <button class="icon-btn" id="prevMonthBtn">‹</button>
+        <span class="month-title" id="monthTitle">СЕНТЯБРЬ</span>
+        <button class="icon-btn" id="nextMonthBtn">›</button>
+      </div>
+      <div class="month-grid" id="monthGrid"></div>
+    </div>
+
+    <!-- Главные показатели -->
     <div class="app__stats">
       <div class="stat">
         <div class="stat__value is-gold" id="statDone">0/0</div>
         <div class="stat__label">сделано сегодня</div>
       </div>
       <div class="stat">
-        <div class="stat__value is-teal" id="statStreak">—</div>
-        <div class="stat__label">лучший стрик</div>
+        <div class="stat__value is-teal" id="statStreak">🔥 0</div>
+        <div class="stat__label">текущий стрик</div>
       </div>
     </div>
 
+    <!-- Список трекеров -->
     <div class="list" id="list"></div>
 
     <div class="empty" id="empty">
@@ -51,10 +74,12 @@
 
   <button class="fab" id="fab" aria-label="Добавить трекер">+</button>
 
+  <!-- Модалка: Добавление / Редактирование -->
   <div class="modal-overlay" id="overlay">
     <div class="modal">
       <h2 class="modal__title" id="modalTitle">Новый трекер</h2>
       <form id="addForm">
+        <input type="hidden" id="editTrackerId" />
         <div class="field">
           <label for="nameInput">Что отслеживаем</label>
           <input id="nameInput" type="text" placeholder="Например: Изучаю Python — анализ" maxlength="80" required />
@@ -63,11 +88,83 @@
           <label for="timeInput">Во сколько (необязательно)</label>
           <input id="timeInput" type="time" />
         </div>
+        <div class="field field-checkbox">
+          <label class="checkbox-label">
+            <input type="checkbox" id="notifyInput" />
+            <span>🔔 Напоминать каждый день</span>
+          </label>
+        </div>
         <div class="modal__actions">
           <button type="button" class="btn ghost" id="cancelBtn">Отмена</button>
-          <button type="submit" class="btn primary" id="submitBtn">Добавить</button>
+          <button type="submit" class="btn primary" id="submitBtn">Сохранить</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- Модалка: Статистика & Достижения -->
+  <div class="modal-overlay" id="statsOverlay">
+    <div class="modal modal--large">
+      <div class="modal__header">
+        <h2 class="modal__title">📊 Статистика и Достижения</h2>
+        <button class="close-btn" id="closeStatsBtn">✕</button>
+      </div>
+      <div class="stats-content">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span class="stat-card__num" id="statWeekScore">0/0</span>
+            <span class="stat-card__label">За неделю</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-card__num" id="statPercent">0%</span>
+            <span class="stat-card__label">Успешность</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-card__num" id="statBestStreak">0 дней</span>
+            <span class="stat-card__label">Лучший стрик</span>
+          </div>
+        </div>
+
+        <div class="stat-details">
+          <p><strong>🏆 Самый стабильный:</strong> <span id="statTopTracker">—</span></p>
+          <p><strong>⚠️ Чаще пропускается:</strong> <span id="statWorstTracker">—</span></p>
+        </div>
+
+        <h3 class="section-title">🏆 Достижения</h3>
+        <div class="achievements-list" id="achievementsList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модалка: Настройки (Резервная копия) -->
+  <div class="modal-overlay" id="settingsOverlay">
+    <div class="modal">
+      <div class="modal__header">
+        <h2 class="modal__title">⚙️ Настройки</h2>
+        <button class="close-btn" id="closeSettingsBtn">✕</button>
+      </div>
+      <div class="settings-content">
+        <h3 class="section-title">🔐 Резервная копия</h3>
+        <p class="settings-desc">Сохраните файл, чтобы не потерять данные при смене устройства или очистке браузера.</p>
+        <div class="settings-actions">
+          <button class="btn primary" id="exportBtn">📦 Экспортировать данные</button>
+          <label class="btn ghost file-label">
+            📥 Импортировать данные
+            <input type="file" id="importInput" accept=".json" hidden />
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модалка: Празднование завершения дня -->
+  <div class="modal-overlay" id="celebrationOverlay">
+    <div class="modal modal--celebrate">
+      <div class="celebration-icon">🎉</div>
+      <h2 class="modal__title">Отличный день!</h2>
+      <p class="celebration-text">Все задачи выполнены.</p>
+      <div class="celebration-streak" id="celebrationStreak">🔥 8 дней подряд</div>
+      <button class="btn primary" id="closeCelebrationBtn">Продолжить</button>
     </div>
   </div>
 
