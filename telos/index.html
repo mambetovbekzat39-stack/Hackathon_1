@@ -1,0 +1,3904 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>Kyro</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="description" content="Преврати свою жизнь в игру. Отслеживай задачи, сопротивляйся соблазнам, достигай целей." />
+  <meta name="theme-color" content="#08090a" />
+  
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Kyro" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,500;1,400;1,500&display=swap');
+    
+    * { box-sizing:border-box; margin:0; padding:0; }
+
+    :root {
+      --bg: #08090a;
+      --bg-soft: #0f1114;
+      --bg-card: #12141a;
+      --bg-elevated: #181b22;
+      --bg-modal: rgba(8,9,10,0.98);
+      --border-subtle: rgba(255,255,255,0.05);
+      --border-strong: rgba(255,255,255,0.1);
+      --gold: #c9a66b;
+      --gold-soft: rgba(201,166,107,0.12);
+      --gold-dim: #9a7b4a;
+      --emerald: #22c55e;
+      --emerald-soft: rgba(34,197,94,0.12);
+      --crimson: #ef4444;
+      --crimson-soft: rgba(239,68,68,0.12);
+      --violet: #8b5cf6;
+      --violet-soft: rgba(139,92,246,0.12);
+      --slate: #64748b;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-dim: #475569;
+      --radius-lg: 14px;
+      --radius-xl: 999px;
+    }
+
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      min-height: 100vh;
+      min-height: 100dvh;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text-main);
+      display:flex;
+      justify-content:center;
+      align-items:flex-start;
+      padding: 20px 14px 32px;
+      font-size: 14px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .app-shell {
+      width:100%;
+      max-width: 480px;
+      background: var(--bg-card);
+      border-radius: 24px;
+      border: 1px solid var(--border-subtle);
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+      padding: 24px 18px 28px;
+      position:relative;
+    }
+
+    .inner {
+      position:relative;
+    }
+
+    /* HEADER */
+
+    .top-header {
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:24px;
+      padding-bottom:20px;
+      border-bottom:1px solid var(--border-subtle);
+    }
+
+    .app-title {
+      font-size:16px;
+      letter-spacing:0.2em;
+      font-weight:500;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      color: var(--text-main);
+      text-transform:uppercase;
+    }
+
+    .header-right {
+      display:flex;
+      flex-direction:column;
+      align-items:flex-end;
+      gap:4px;
+    }
+
+    .settings-btn {
+      background: var(--bg-elevated);
+      border:1px solid var(--border-subtle);
+      border-radius:10px;
+      padding:10px 12px;
+      cursor:pointer;
+      color:var(--text-muted);
+      font-size:16px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      transition: all 0.2s ease;
+    }
+    .settings-btn:hover {
+      background: var(--bg-soft);
+      border-color:var(--border-strong);
+      color:var(--text-main);
+    }
+
+    /* NAV TABS */
+
+    .nav-tabs {
+      display:grid;
+      grid-template-columns:repeat(5,minmax(0,1fr));
+      gap:3px;
+      padding:4px;
+      border-radius:14px;
+      background:var(--bg-soft);
+      margin-bottom:20px;
+    }
+
+    .nav-tab {
+      border:none;
+      background:transparent;
+      color:var(--text-dim);
+      font-size:9px;
+      font-weight:600;
+      padding:10px 6px;
+      border-radius:10px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:5px;
+      cursor:pointer;
+      transition: all 0.15s ease;
+      text-transform:uppercase;
+      letter-spacing:0.04em;
+    }
+
+    .nav-tab span.icon {
+      font-size:16px;
+      opacity: 0.5;
+      transition: opacity 0.15s ease;
+    }
+
+    .nav-tab:hover {
+      color:var(--text-muted);
+    }
+
+    .nav-tab:hover span.icon {
+      opacity: 0.7;
+    }
+
+    .nav-tab.active {
+      background: var(--bg-elevated);
+      color:var(--text-main);
+    }
+
+    .nav-tab.active span.icon {
+      opacity: 1;
+    }
+
+    /* COMMON UI */
+
+    .card {
+      background: var(--bg-elevated);
+      border-radius: var(--radius-lg);
+      border:1px solid var(--border-subtle);
+      padding:18px 16px;
+      margin-bottom:12px;
+    }
+
+    .section-title {
+      font-size:11px;
+      letter-spacing:0.06em;
+      color:var(--text-muted);
+      margin-bottom:16px;
+      font-weight:600;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      text-transform:uppercase;
+    }
+
+    .section-title .icon {
+      font-size:13px;
+    }
+    .section-title .icon.green { color: var(--emerald); }
+    .section-title .icon.red { color: var(--crimson); }
+    .section-title .icon.purple { color: var(--violet); }
+    .section-title .icon.gold { color: var(--gold); }
+
+    .row {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:10px;
+      padding:12px 0;
+      border-bottom:1px solid var(--border-subtle);
+    }
+    .row:last-child { 
+      margin-bottom:0; 
+      padding-bottom:0;
+      border-bottom:none;
+    }
+
+    .pill {
+      font-size:10px;
+      padding:4px 8px;
+      border-radius:4px;
+      background:var(--bg-soft);
+      color:var(--text-muted);
+      display:inline-flex;
+      align-items:center;
+      gap:4px;
+      font-weight:500;
+      letter-spacing:0.02em;
+    }
+    .pill.green {
+      background: var(--emerald-soft);
+      color:var(--emerald);
+    }
+    .pill.red {
+      background: var(--crimson-soft);
+      color:var(--crimson);
+    }
+    .pill.gold {
+      background: var(--gold-soft);
+      color:var(--gold);
+    }
+    .pill.violet {
+      background: var(--violet-soft);
+      color:var(--violet);
+    }
+    .pill.subtle {
+      background:var(--bg-soft);
+      color:var(--text-dim);
+    }
+
+    .badges {
+      display:flex;
+      flex-wrap:wrap;
+      gap:5px;
+      margin-top:6px;
+    }
+
+    .btn {
+      border-radius:6px;
+      border:none;
+      padding:10px 16px;
+      font-size:12px;
+      cursor:pointer;
+      font-weight:600;
+      background: var(--gold);
+      color:#0a0a0a;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      white-space:nowrap;
+      transition: all 0.15s ease;
+      letter-spacing:0.01em;
+    }
+    .btn:hover {
+      filter: brightness(1.1);
+    }
+    .btn:active {
+      transform: scale(0.98);
+    }
+    .btn.small {
+      font-size:11px;
+      padding:6px 12px;
+    }
+    .btn.green {
+      background: var(--emerald);
+      color:#0a0a0a;
+    }
+    .btn.ghost {
+      background:transparent;
+      color:var(--text-muted);
+      border:1px solid var(--border-strong);
+    }
+    .btn.ghost:hover {
+      background:var(--bg-soft);
+      color:var(--text-main);
+    }
+    .btn.danger {
+      background: var(--crimson);
+      color:#0a0a0a;
+    }
+    .btn.violet {
+      background: var(--violet);
+      color:#fff;
+    }
+    .btn:disabled {
+      opacity:0.4;
+      cursor:not-allowed;
+    }
+
+    input, select {
+      width:100%;
+      padding:12px 14px;
+      border-radius:8px;
+      border:1px solid var(--border-subtle);
+      background:var(--bg-soft);
+      color:var(--text-main);
+      font-size:14px;
+      font-family:inherit;
+      outline:none;
+      transition: border-color 0.15s ease;
+    }
+    input:focus, select:focus {
+      border-color:var(--gold-dim);
+    }
+    input::placeholder { color:var(--text-dim); }
+    select {
+      cursor:pointer;
+    }
+
+    label {
+      font-size:10px;
+      color:var(--text-dim);
+      margin-bottom:8px;
+      display:block;
+      font-weight:600;
+      text-transform:uppercase;
+      letter-spacing:0.06em;
+    }
+
+    .small { font-size:12px; color:var(--text-muted); line-height:1.5; }
+
+    .weekday-chips {
+      display:flex;
+      flex-wrap:wrap;
+      gap:6px;
+      margin-top:6px;
+    }
+    .weekday {
+      font-size:11px;
+      padding:6px 12px;
+      border-radius:6px;
+      border:1px solid var(--border-subtle);
+      cursor:pointer;
+      user-select:none;
+      color:var(--text-muted);
+      transition: all 0.15s ease;
+      background:var(--bg-soft);
+    }
+    .weekday:hover {
+      border-color:var(--border-strong);
+    }
+    .weekday.selected {
+      border-color:var(--gold-dim);
+      background:var(--gold-soft);
+      color:var(--gold);
+      font-weight:600;
+    }
+
+    /* MODAL */
+
+    .modal-overlay {
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,0.8);
+      backdrop-filter:blur(10px);
+      z-index:1000;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+    }
+    .modal-overlay.active {
+      display:flex;
+    }
+
+    .modal {
+      background: var(--bg-card);
+      border-radius:20px;
+      border:1px solid var(--border-subtle);
+      max-width:480px;
+      width:100%;
+      max-height:90vh;
+      overflow-y:auto;
+      padding:24px;
+      box-shadow:0 25px 50px rgba(0,0,0,0.6);
+    }
+
+    .modal-header {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:24px;
+      padding-bottom:16px;
+      border-bottom:1px solid var(--border-subtle);
+    }
+    .modal-title {
+      font-size:18px;
+      font-weight:700;
+      color:var(--text-main);
+    }
+    .modal-close {
+      background:var(--bg-elevated);
+      border:1px solid var(--border-subtle);
+      border-radius:8px;
+      padding:8px 12px;
+      cursor:pointer;
+      color:var(--text-muted);
+      font-size:16px;
+      transition: all 0.15s ease;
+    }
+    .modal-close:hover {
+      background:var(--bg-soft);
+      color:var(--text-main);
+    }
+
+    /* CALENDAR STREAKS */
+
+    .calendar-header {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:6px;
+      margin-top:4px;
+      margin-bottom:12px;
+    }
+
+    .calendar {
+      margin-top:6px;
+      display:grid;
+      grid-template-columns:repeat(7,minmax(0,1fr));
+      gap:4px;
+    }
+
+    .day-name {
+      font-size:10px;
+      text-align:center;
+      color:var(--text-dim);
+      margin-bottom:4px;
+      font-weight:600;
+    }
+
+    .day-cell {
+      height:34px;
+      border-radius:8px;
+      font-size:12px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:var(--bg-soft);
+      color:var(--text-muted);
+      font-weight:500;
+    }
+
+    .day-cell.done {
+      background:var(--emerald-soft);
+      color:var(--emerald);
+      font-weight:600;
+    }
+
+    .day-cell.missed {
+      background:var(--bg-soft);
+      color:var(--text-dim);
+    }
+
+    .day-cell.off {
+      opacity:0.3;
+    }
+
+    .day-cell.future {
+      opacity:0.4;
+    }
+
+    .day-cell.today {
+      position:relative;
+      box-shadow: inset 0 0 0 2px var(--gold);
+    }
+
+    .streak-footer {
+      margin-top:16px;
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      font-size:12px;
+      color:var(--text-muted);
+    }
+
+    .streak-footer strong { 
+      color:var(--text-main);
+      font-size:20px;
+      font-weight:700;
+    }
+
+    /* NET POINTS DISPLAY */
+
+    .net-points-display {
+      text-align:center;
+      padding:24px;
+      background: var(--bg-elevated);
+      border-radius:var(--radius-lg);
+      border:1px solid var(--border-subtle);
+      margin-bottom:16px;
+    }
+    .net-points-label {
+      font-size:11px;
+      text-transform:uppercase;
+      letter-spacing:0.1em;
+      color:var(--text-dim);
+      margin-bottom:8px;
+      font-weight:500;
+    }
+    .net-points-value {
+      font-size:42px;
+      font-weight:800;
+      color:var(--gold);
+      margin-bottom:10px;
+    }
+    .net-points-breakdown {
+      margin-top:14px;
+      padding-top:14px;
+      border-top:1px solid var(--border-subtle);
+    }
+    .breakdown-label {
+      font-size:10px;
+      text-transform:uppercase;
+      letter-spacing:0.08em;
+      color:var(--text-dim);
+      font-weight:500;
+      margin-bottom:4px;
+    }
+    .breakdown-value {
+      font-size:18px;
+      font-weight:700;
+      color:var(--crimson);
+    }
+
+    .balance-row {
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:12px;
+      padding:8px 0;
+    }
+
+    .balance-item {
+      text-align:center;
+      padding:12px 16px;
+      background:var(--bg-soft);
+      border-radius:10px;
+      min-width:70px;
+    }
+
+    .balance-item.main {
+      background: var(--bg-elevated);
+      border:1px solid var(--border-subtle);
+    }
+
+    .balance-item-value {
+      font-size:24px;
+      font-weight:700;
+      line-height:1.2;
+    }
+
+    .balance-item-label {
+      font-size:9px;
+      text-transform:uppercase;
+      letter-spacing:0.05em;
+      color:var(--text-dim);
+      margin-top:4px;
+      font-weight:500;
+    }
+
+    .balance-operator {
+      font-size:18px;
+      font-weight:600;
+      color:var(--text-dim);
+    }
+
+    .balance-note {
+      text-align:center;
+      font-size:11px;
+      color:var(--text-muted);
+      margin-top:12px;
+      padding-top:12px;
+      border-top:1px solid var(--border-subtle);
+    }
+
+    /* WEEK SCROLL */
+
+    .week-scroll-container {
+      margin-bottom:12px;
+    }
+
+    .week-scroll {
+      display:flex;
+      gap:8px;
+      overflow-x:auto;
+      padding:4px 0;
+      scrollbar-width:none;
+      -ms-overflow-style:none;
+    }
+
+    .week-scroll::-webkit-scrollbar {
+      display:none;
+    }
+
+    .week-day {
+      flex-shrink:0;
+      width:72px;
+      padding:12px 8px;
+      background:var(--bg-elevated);
+      border:1px solid var(--border-subtle);
+      border-radius:12px;
+      text-align:center;
+      cursor:pointer;
+      transition:all 0.15s ease;
+    }
+
+    .week-day:hover {
+      border-color:var(--border-strong);
+    }
+
+    .week-day.selected {
+      background:var(--gold-soft);
+      border-color:var(--gold-dim);
+    }
+
+    .week-day.today .week-day-num {
+      color:var(--gold);
+    }
+
+    .week-day.selected .week-day-num {
+      color:var(--gold);
+    }
+
+    .week-day-name {
+      font-size:9px;
+      font-weight:600;
+      color:var(--text-dim);
+      text-transform:uppercase;
+      letter-spacing:0.06em;
+      margin-bottom:4px;
+    }
+
+    .week-day-num {
+      font-size:22px;
+      font-weight:600;
+      color:var(--text-main);
+      line-height:1;
+      letter-spacing:-0.02em;
+    }
+
+    .week-day-count {
+      font-size:9px;
+      color:var(--text-dim);
+      margin-top:4px;
+    }
+
+    .week-day.selected .week-day-count {
+      color:var(--gold-dim);
+    }
+
+    /* ANALYTICS */
+
+    .analytics-grid {
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:8px;
+    }
+
+    .analytics-card {
+      background:var(--bg-soft);
+      border-radius:10px;
+      padding:14px 12px;
+      text-align:center;
+    }
+
+    .analytics-label {
+      font-size:9px;
+      text-transform:uppercase;
+      letter-spacing:0.08em;
+      color:var(--text-dim);
+      margin-bottom:8px;
+      font-weight:600;
+    }
+
+    .analytics-value {
+      font-size:28px;
+      font-weight:700;
+      color:var(--gold);
+      letter-spacing:-0.03em;
+      line-height:1;
+    }
+
+    .analytics-sublabel {
+      font-size:9px;
+      color:var(--text-dim);
+      text-transform:uppercase;
+      letter-spacing:0.04em;
+      margin-top:6px;
+      font-weight:500;
+    }
+
+    /* VISION CARDS */
+    .vision-card {
+      background: linear-gradient(135deg, var(--gold-soft), rgba(201,166,107,0.05));
+      border: 1px solid rgba(201,166,107,0.2);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    .vision-card.anti {
+      background: linear-gradient(135deg, var(--crimson-soft), rgba(239,68,68,0.05));
+      border-color: rgba(239,68,68,0.2);
+    }
+    .vision-card-label {
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 8px;
+    }
+    .vision-card.anti .vision-card-label {
+      color: var(--crimson);
+    }
+    .vision-card-text {
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--text-muted);
+      font-style: italic;
+    }
+    .vision-card-empty {
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    /* INSTALL BANNER (top of app) */
+    .install-banner {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      background: linear-gradient(135deg, var(--gold-soft), rgba(201,166,107,0.05));
+      border:1px solid var(--gold-dim);
+      border-radius:12px;
+      padding:12px 14px;
+      margin-bottom:16px;
+    }
+    .install-banner.hidden {
+      display:none;
+    }
+    .install-banner-text {
+      display:flex;
+      align-items:center;
+      gap:8px;
+      font-size:12px;
+      font-weight:600;
+      color:var(--gold);
+    }
+    .install-banner-text .icon {
+      font-size:16px;
+    }
+    .install-banner-btn {
+      background: var(--gold);
+      color:#0a0a0a;
+      border:none;
+      border-radius:6px;
+      padding:8px 14px;
+      font-size:11px;
+      font-weight:700;
+      cursor:pointer;
+      white-space:nowrap;
+      letter-spacing:0.02em;
+      transition: filter 0.15s ease;
+    }
+    .install-banner-btn:hover {
+      filter: brightness(1.1);
+    }
+    .install-banner-close {
+      background:transparent;
+      border:none;
+      color:var(--gold-dim);
+      cursor:pointer;
+      font-size:14px;
+      padding:2px 4px;
+      line-height:1;
+    }
+
+    /* VICTORY BANNER */
+    .victory-banner {
+      background: linear-gradient(135deg, var(--emerald-soft), rgba(52,211,153,0.05));
+      border:1px solid var(--emerald);
+      border-radius:12px;
+      padding:16px;
+      text-align:center;
+      margin-bottom:16px;
+    }
+
+    .victory-icon {
+      font-size:20px;
+      color:var(--emerald);
+      margin-bottom:8px;
+    }
+
+    .victory-text {
+      font-size:11px;
+      font-weight:600;
+      color:var(--emerald);
+      text-transform:uppercase;
+      letter-spacing:0.1em;
+    }
+
+    @media (max-width:360px) {
+      .app-shell { padding-inline:14px; }
+      .top-header { flex-direction:column; align-items:flex-start; }
+      .header-right { align-items:flex-start; margin-top:8px; }
+    }
+
+    /* Larger screens: tablets / desktops */
+    @media (min-width:640px) {
+      body { padding: 40px 20px; align-items:center; }
+      .app-shell { max-width: 560px; padding: 32px 28px 34px; }
+      .analytics-value { font-size:30px; }
+    }
+
+    @media (min-width:900px) {
+      body { padding: 56px 20px; }
+      .app-shell { max-width: 620px; }
+      .nav-tab { font-size:10px; }
+      .nav-tab span.icon { font-size:18px; }
+    }
+
+    /* PIN LOCK */
+    .pin-lock {
+      position:fixed;
+      inset:0;
+      background:var(--bg);
+      z-index:9998;
+      display:none;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+    }
+    .pin-lock.visible { display:flex; }
+    .pin-lock.hidden { display:none; }
+    .pin-lock-title { font-size:14px; font-weight:500; margin-bottom:12px; text-transform:uppercase; letter-spacing:0.3em; }
+    .pin-lock-msg { font-size:12px; color:var(--text-dim); margin-bottom:32px; letter-spacing:0.02em; }
+    .pin-dots { display:flex; gap:14px; margin-bottom:28px; }
+    .pin-dot { width:14px; height:14px; border-radius:50%; background:var(--bg-elevated); border:2px solid var(--border-strong); }
+    .pin-dot.filled { background:var(--gold); border-color:var(--gold); }
+    .pin-dot.error { background:var(--crimson); border-color:var(--crimson); }
+    .pin-pad { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+    .pin-btn {
+      width:68px; height:68px; border-radius:50%;
+      background:var(--bg-elevated); border:1px solid var(--border-subtle);
+      color:var(--text-main); font-size:26px; font-weight:600;
+      cursor:pointer; font-family:inherit;
+    }
+    .pin-btn:active { transform:scale(0.95); }
+    .pin-btn.empty { visibility:hidden; }
+    .pin-btn.back { font-size:18px; color:var(--text-muted); }
+
+    /* SETTINGS NAV */
+    .settings-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 16px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    
+    .settings-nav-btn {
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-soft);
+      color: var(--text-muted);
+      font-size: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-family: inherit;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    
+    .settings-nav-btn:hover {
+      border-color: var(--border-strong);
+      color: var(--text-main);
+    }
+    
+    .settings-nav-btn.active {
+      background: var(--gold-soft);
+      border-color: var(--gold-dim);
+      color: var(--gold);
+    }
+    
+    .settings-section {
+      display: none;
+    }
+    
+    .settings-section.active {
+      display: block;
+    }
+
+    /* ONBOARDING */
+    .onboarding {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 24px;
+      overflow: hidden;
+      overflow-y: auto;
+    }
+    .onboarding.hidden { display: none; }
+
+    /* Persistent header logo - always at top */
+    .onboarding-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: 28px 24px;
+      text-align: center;
+      z-index: 10;
+      background: linear-gradient(to bottom, var(--bg) 60%, transparent);
+    }
+    .onboarding-header-logo {
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      opacity: 0;
+      transition: opacity 1s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .onboarding-header-logo.visible {
+      opacity: 1;
+    }
+
+    /* Screens */
+    .onboarding-screen {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 100px 24px 120px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .onboarding-screen.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Screen 0: Quote */
+    .onboarding-quote {
+      max-width: 340px;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1), transform 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .onboarding-quote.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .onboarding-quote-text {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 22px;
+      line-height: 1.6;
+      color: var(--text-main);
+      font-weight: 400;
+      letter-spacing: -0.01em;
+      font-style: italic;
+    }
+    .onboarding-quote-author {
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      color: var(--text-dim);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-top: 40px;
+      font-weight: 500;
+      opacity: 0;
+      transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.6s;
+    }
+    .onboarding-quote.visible .onboarding-quote-author {
+      opacity: 1;
+    }
+    .onboarding-quote-btn {
+      margin-top: 56px;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .onboarding-quote-btn.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Content screens */
+    .onboarding-content {
+      max-width: 360px;
+      width: 100%;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1) 0.1s, transform 0.7s cubic-bezier(0.4, 0, 0.2, 1) 0.1s;
+    }
+    .onboarding-screen.active .onboarding-content {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .onboarding-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 12px;
+    }
+    .onboarding-title {
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: var(--text-main);
+      margin-bottom: 12px;
+    }
+    .onboarding-desc {
+      font-size: 14px;
+      line-height: 1.7;
+      color: var(--text-muted);
+      margin-bottom: 28px;
+    }
+    .onboarding-desc strong {
+      color: var(--gold);
+      font-weight: 600;
+    }
+    .onboarding-desc a {
+      color: var(--gold);
+      text-decoration: none;
+    }
+    .onboarding-desc a:hover {
+      text-decoration: underline;
+    }
+
+    /* Article card */
+    .onboarding-article {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 28px;
+      text-align: left;
+    }
+    .onboarding-article-source {
+      font-size: 10px;
+      color: var(--text-dim);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .onboarding-article-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-main);
+      line-height: 1.4;
+      margin-bottom: 10px;
+    }
+    .onboarding-article-excerpt {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+    .onboarding-article-link {
+      display: inline-block;
+      margin-top: 14px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--gold);
+      text-decoration: none;
+      letter-spacing: 0.03em;
+    }
+    .onboarding-article-link:hover {
+      text-decoration: underline;
+    }
+
+    /* Textarea for vision input */
+    .onboarding-textarea {
+      width: 100%;
+      min-height: 140px;
+      padding: 16px;
+      border-radius: 10px;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-card);
+      color: var(--text-main);
+      font-size: 14px;
+      font-family: inherit;
+      line-height: 1.6;
+      resize: none;
+      outline: none;
+      transition: border-color 0.2s ease;
+      margin-bottom: 12px;
+    }
+    .onboarding-textarea:focus {
+      border-color: var(--gold-dim);
+    }
+    .onboarding-textarea::placeholder {
+      color: var(--text-dim);
+    }
+    .onboarding-textarea.anti {
+      border-color: rgba(239,68,68,0.3);
+    }
+    .onboarding-textarea.anti:focus {
+      border-color: var(--crimson);
+    }
+    .onboarding-word-count {
+      font-size: 11px;
+      color: var(--text-dim);
+      text-align: right;
+      margin-bottom: 24px;
+    }
+
+    /* Progress dots */
+    .onboarding-progress {
+      position: fixed;
+      bottom: 36px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 8px;
+      opacity: 0;
+      transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 10;
+    }
+    .onboarding-progress.visible {
+      opacity: 1;
+    }
+    .onboarding-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--text-dim);
+      opacity: 0.3;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .onboarding-dot.active {
+      opacity: 1;
+      background: var(--gold);
+      width: 18px;
+      border-radius: 3px;
+    }
+
+    /* Buttons */
+    .onboarding-btn {
+      padding: 14px 36px;
+      border-radius: 8px;
+      border: none;
+      background: var(--gold);
+      color: #0a0a0a;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      font-family: inherit;
+    }
+    .onboarding-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px rgba(201,166,107,0.3);
+    }
+    .onboarding-btn:active {
+      transform: translateY(0);
+    }
+    .onboarding-btn.secondary {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border-strong);
+    }
+    .onboarding-btn.secondary:hover {
+      color: var(--text-main);
+      border-color: var(--text-dim);
+      box-shadow: none;
+      transform: none;
+    }
+
+    .onboarding-skip {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      font-size: 10px;
+      color: var(--text-dim);
+      background: none;
+      border: none;
+      cursor: pointer;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-family: inherit;
+      padding: 8px;
+      opacity: 0;
+      transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), color 0.2s ease;
+      z-index: 11;
+    }
+    .onboarding-skip.visible {
+      opacity: 1;
+    }
+    .onboarding-skip:hover {
+      color: var(--text-muted);
+    }
+
+    /* How it works flow diagram */
+    .onboarding-flow {
+      margin: 24px 0 32px;
+    }
+    .flow-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .flow-row.final {
+      margin-top: 24px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border-subtle);
+    }
+    .flow-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      min-width: 70px;
+    }
+    .flow-item.earn, .flow-item.points {
+      border-color: rgba(34,197,94,0.3);
+      background: rgba(34,197,94,0.08);
+    }
+    .flow-item.earn .flow-icon, .flow-item.points .flow-icon {
+      color: var(--emerald);
+    }
+    .flow-item.slip, .flow-item.debt {
+      border-color: rgba(239,68,68,0.3);
+      background: rgba(239,68,68,0.08);
+    }
+    .flow-item.slip .flow-icon, .flow-item.debt .flow-icon {
+      color: var(--crimson);
+    }
+    .flow-item.atone {
+      border-color: rgba(139,92,246,0.3);
+      background: rgba(139,92,246,0.08);
+    }
+    .flow-item.atone .flow-icon {
+      color: var(--violet);
+    }
+    .flow-item.balance {
+      border-color: rgba(201,166,107,0.3);
+      background: rgba(201,166,107,0.08);
+    }
+    .flow-item.balance .flow-icon {
+      color: var(--gold);
+    }
+    .flow-item.reward {
+      border-color: rgba(201,166,107,0.4);
+      background: rgba(201,166,107,0.15);
+    }
+    .flow-item.reward .flow-icon {
+      color: var(--gold);
+    }
+    .flow-icon {
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .flow-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    .flow-arrow {
+      font-size: 14px;
+      color: var(--text-dim);
+      font-weight: 500;
+    }
+    .flow-plus {
+      font-size: 16px;
+      color: var(--emerald);
+      font-weight: 600;
+    }
+
+    /* Install Prompt */
+    .install-icon {
+      font-size: 48px;
+      margin-bottom: 20px;
+    }
+    .install-instructions {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      text-align: left;
+    }
+    .install-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .install-step:last-child {
+      margin-bottom: 0;
+    }
+    .install-step-num {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--gold);
+      color: #0a0a0a;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .install-step-text {
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--text-muted);
+    }
+    .install-step-text strong {
+      color: var(--text-main);
+    }
+    .install-badge {
+      display: inline-block;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      padding: 2px 8px;
+      font-size: 11px;
+      margin: 0 2px;
+    }
+
+    /* Time Picker */
+    .onboarding-time-picker {
+      margin: 24px 0;
+    }
+    .onboarding-time-picker input[type="time"] {
+      font-size: 32px;
+      font-weight: 600;
+      padding: 16px 24px;
+      border-radius: 12px;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-card);
+      color: var(--text-main);
+      font-family: inherit;
+      text-align: center;
+      outline: none;
+      width: auto;
+      min-width: 180px;
+    }
+    .onboarding-time-picker input[type="time"]:focus {
+      border-color: var(--gold-dim);
+    }
+
+    /* Reflection Modal */
+    .reflection-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(8,9,10,0.95);
+      backdrop-filter: blur(20px);
+      z-index: 10000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .reflection-modal.active {
+      display: flex;
+    }
+    .reflection-content {
+      max-width: 380px;
+      width: 100%;
+      text-align: center;
+      padding: 40px 24px;
+    }
+    .reflection-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 24px;
+    }
+    .reflection-question {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 20px;
+      line-height: 1.6;
+      color: var(--text-main);
+      font-style: italic;
+      margin-bottom: 40px;
+    }
+    .reflection-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Onboarding Flow -->
+<div class="onboarding" id="onboarding">
+  <button class="onboarding-skip" id="onboarding-skip">Пропустить</button>
+  
+  <!-- Persistent header -->
+  <div class="onboarding-header">
+    <div class="onboarding-header-logo" id="onboarding-logo">Kyro</div>
+  </div>
+  
+  <!-- Screen 0: Install Prompt -->
+  <div class="onboarding-screen active" data-screen="0">
+    <div class="onboarding-content">
+      <div class="install-icon">📲</div>
+      <div class="onboarding-title">Установите Kyro</div>
+      <div class="onboarding-desc">
+        Для лучшего опыта добавьте Kyro на главный экран. Приложение работает офлайн и выглядит как нативное.
+      </div>
+      <div class="install-instructions" id="install-instructions">
+        <!-- Instructions populated by JS based on device -->
+      </div>
+      <button class="onboarding-btn" id="onboarding-next-install">Я установил(а)</button>
+      <button class="onboarding-btn secondary" id="onboarding-skip-install" style="margin-top:12px;">Продолжить в браузере</button>
+    </div>
+  </div>
+  
+  <!-- Screen 1: Quote -->
+  <div class="onboarding-screen" data-screen="1">
+    <div class="onboarding-quote" id="onboarding-quote">
+      <div class="onboarding-quote-text">«Единственная настоящая проверка интеллекта — получаешь ли ты то, чего хочешь от жизни».</div>
+      <div class="onboarding-quote-author">— Навал Равикант</div>
+    </div>
+    <div class="onboarding-quote-btn" id="quote-btn-wrapper">
+      <button class="onboarding-btn" id="onboarding-quote-start">Начать</button>
+    </div>
+  </div>
+  
+  <!-- Screen 2: Recommended Reading -->
+  <div class="onboarding-screen" data-screen="2">
+    <div class="onboarding-content">
+      <div class="onboarding-label">Рекомендуем</div>
+      <div class="onboarding-title">Перед началом</div>
+      <div class="onboarding-desc">
+        Это приложение вдохновлено философией осознанной жизни Дэна Коу. Прочтение этого текста поможет получить максимум от Kyro.
+      </div>
+      <div class="onboarding-article">
+        <div class="onboarding-article-source">Дэн Коу</div>
+        <div class="onboarding-article-title">Как исправить всю свою жизнь за 1 день</div>
+        <div class="onboarding-article-excerpt">«Оптимальное состояние внутреннего опыта — это порядок в сознании. Он возникает, когда психическая энергия — то есть внимание — вкладывается в реалистичные цели...»</div>
+        <a href="https://x.com/thedankoe/status/2010751592346030461" target="_blank" class="onboarding-article-link">Читать тред →</a>
+      </div>
+      <button class="onboarding-btn" id="onboarding-next-2">Продолжить</button>
+    </div>
+  </div>
+  
+  <!-- Screen 3: Anti-Vision -->
+  <div class="onboarding-screen" data-screen="3">
+    <div class="onboarding-content">
+      <div class="onboarding-label">Шаг 1</div>
+      <div class="onboarding-title">Антивидение</div>
+      <div class="onboarding-desc">
+        Какой жизнью ты <strong>никогда</strong> не хочешь жить? Какой версией себя ты отказываешься становиться?
+      </div>
+      <textarea class="onboarding-textarea anti" id="anti-vision-input" placeholder="напр. Полный сожалений, растраченный потенциал..." maxlength="200"></textarea>
+      <div class="onboarding-word-count"><span id="anti-char-count">0</span> / 200</div>
+      <button class="onboarding-btn" id="onboarding-next-3">Продолжить</button>
+    </div>
+  </div>
+  
+  <!-- Screen 4: Vision -->
+  <div class="onboarding-screen" data-screen="4">
+    <div class="onboarding-content">
+      <div class="onboarding-label">Шаг 2</div>
+      <div class="onboarding-title">Видение</div>
+      <div class="onboarding-desc">
+        Как выглядит твоя <strong>идеальная жизнь</strong>? Человек, которым ты стремишься стать?
+      </div>
+      <textarea class="onboarding-textarea" id="vision-input" placeholder="напр. Жить жизнью на своих условиях..." maxlength="200"></textarea>
+      <div class="onboarding-word-count"><span id="vision-char-count">0</span> / 200</div>
+      <button class="onboarding-btn" id="onboarding-next-4">Продолжить</button>
+    </div>
+  </div>
+  
+  <!-- Screen 5: Reflection Time -->
+  <div class="onboarding-screen" data-screen="5">
+    <div class="onboarding-content">
+      <div class="onboarding-label">Шаг 3</div>
+      <div class="onboarding-title">Ежедневная рефлексия</div>
+      <div class="onboarding-desc">
+        Выбери время, когда ты <strong>не занят(а)</strong> — по пути на работу, за утренним кофе, перед сном. Мы пришлём вопрос для размышления о жизни.
+      </div>
+      <div class="onboarding-time-picker">
+        <input type="time" id="reflection-time-input" value="08:00" />
+      </div>
+      <p class="small" style="margin-top:16px;color:var(--text-dim);text-align:center;">Позже это можно изменить в настройках</p>
+      <button class="onboarding-btn" id="onboarding-next-5">Продолжить</button>
+    </div>
+  </div>
+  
+  <!-- Screen 6: How it works -->
+  <div class="onboarding-screen" data-screen="6">
+    <div class="onboarding-content">
+      <div class="onboarding-label">Как это работает</div>
+      <div class="onboarding-title">Просто.</div>
+      <div class="onboarding-flow">
+        <div class="flow-row">
+          <div class="flow-item earn">
+            <div class="flow-icon">✓</div>
+            <div class="flow-label">Задачи</div>
+          </div>
+          <div class="flow-plus">+</div>
+          <div class="flow-item earn">
+            <div class="flow-icon">⚑</div>
+            <div class="flow-label">Цели</div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-item points">
+            <div class="flow-icon">+</div>
+            <div class="flow-label">Очки</div>
+          </div>
+        </div>
+        <div class="flow-row">
+          <div class="flow-item slip">
+            <div class="flow-icon">✗</div>
+            <div class="flow-label">Срыв</div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-item debt">
+            <div class="flow-icon">−</div>
+            <div class="flow-label">Долг</div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-item atone">
+            <div class="flow-icon">↺</div>
+            <div class="flow-label">Отработка</div>
+          </div>
+        </div>
+        <div class="flow-row final">
+          <div class="flow-item balance">
+            <div class="flow-icon">⚖</div>
+            <div class="flow-label">Баланс</div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-item reward">
+            <div class="flow-icon">★</div>
+            <div class="flow-label">Награды</div>
+          </div>
+        </div>
+      </div>
+      <button class="onboarding-btn" id="onboarding-start">Войти в Kyro</button>
+    </div>
+  </div>
+  
+  <div class="onboarding-progress" id="onboarding-progress"></div>
+</div>
+
+<!-- Reflection Modal -->
+<div class="reflection-modal" id="reflection-modal">
+  <div class="reflection-content">
+    <div class="reflection-label">Ежедневная рефлексия</div>
+    <div class="reflection-question" id="reflection-question"></div>
+    <div class="reflection-actions">
+      <button class="onboarding-btn secondary" id="reflection-skip">Позже</button>
+      <button class="onboarding-btn" id="reflection-done">Я поразмышлял(а)</button>
+    </div>
+  </div>
+</div>
+
+<div class="pin-lock" id="pin-lock">
+  <div class="pin-lock-title">Kyro</div>
+  <div class="pin-lock-msg" id="pin-msg">Введите PIN</div>
+  <div class="pin-dots" id="pin-dots">
+    <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+  </div>
+  <div class="pin-pad" id="pin-pad">
+    <button class="pin-btn">1</button><button class="pin-btn">2</button><button class="pin-btn">3</button>
+    <button class="pin-btn">4</button><button class="pin-btn">5</button><button class="pin-btn">6</button>
+    <button class="pin-btn">7</button><button class="pin-btn">8</button><button class="pin-btn">9</button>
+    <button class="pin-btn empty"></button><button class="pin-btn">0</button><button class="pin-btn back">←</button>
+  </div>
+</div>
+
+<div class="app-shell" style="display:none">
+  <div class="inner">
+    <div class="install-banner hidden" id="install-banner">
+      <div class="install-banner-text"><span class="icon">⊕</span><span>Установите Kyro на телефон</span></div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <button class="install-banner-btn" id="install-banner-btn">Установить</button>
+        <button class="install-banner-close" id="install-banner-close" title="Скрыть">✕</button>
+      </div>
+    </div>
+    <header class="top-header">
+      <div>
+        <div class="app-title">
+          <span>Kyro</span>
+        </div>
+      </div>
+      <div class="header-right">
+        <button class="settings-btn" id="settings-btn">☰</button>
+      </div>
+    </header>
+
+    <nav class="nav-tabs">
+      <button class="nav-tab active" data-tab="tasks">
+        <span class="icon" style="color:var(--emerald)">✓</span>
+        <span>Задачи</span>
+      </button>
+      <button class="nav-tab" data-tab="goals">
+        <span class="icon" style="color:var(--emerald)">⚑</span>
+        <span>Цели</span>
+      </button>
+      <button class="nav-tab" data-tab="anti">
+        <span class="icon" style="color:var(--crimson)">⚔</span>
+        <span>Борьба</span>
+      </button>
+      <button class="nav-tab" data-tab="analytics">
+        <span class="icon">↗</span>
+        <span>Прогресс</span>
+      </button>
+      <button class="nav-tab" data-tab="redeem">
+        <span class="icon" style="color:var(--gold)">⚖</span>
+        <span>Баланс</span>
+      </button>
+    </nav>
+
+    <section id="tab-tasks"></section>
+    <section id="tab-goals" style="display:none;"></section>
+    <section id="tab-anti" style="display:none;"></section>
+    <section id="tab-analytics" style="display:none;"></section>
+    <section id="tab-redeem" style="display:none;"></section>
+  </div>
+</div>
+
+<!-- Settings Modal -->
+<div class="modal-overlay" id="settings-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Настройки</div>
+      <button class="modal-close" id="modal-close">✕</button>
+    </div>
+    <div id="settings-content"></div>
+  </div>
+</div>
+
+<!-- Install Instructions Modal (fallback when native install prompt isn't available) -->
+<div class="modal-overlay" id="install-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Установка приложения</div>
+      <button class="modal-close" id="install-modal-close">✕</button>
+    </div>
+    <div id="install-modal-instructions"></div>
+  </div>
+</div>
+
+
+<script>
+(function () {
+  const STORAGE_KEY = 'kyro_v1';
+  const ONBOARDING_KEY = 'kyro_onboarded';
+  const WEEKDAYS = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
+
+  // -------- Onboarding --------
+  const VISION_KEY = 'kyro_vision';
+  const ANTI_VISION_KEY = 'kyro_antivision';
+  const REFLECTION_TIME_KEY = 'kyro_reflection_time';
+  const LAST_REFLECTION_KEY = 'kyro_last_reflection';
+  let currentOnboardingScreen = 0;
+  const totalOnboardingScreens = 7; // Screens 0-6
+  
+  function isStandalone() {
+    return window.matchMedia('(display-mode: standalone)').matches 
+      || window.navigator.standalone === true;
+  }
+  
+  function getDeviceType() {
+    const ua = navigator.userAgent;
+    if (/iPad|iPhone|iPod/.test(ua)) return 'ios';
+    if (/Android/.test(ua)) return 'android';
+    return 'desktop';
+  }
+  
+  function populateInstallInstructions(containerId) {
+    const container = document.getElementById(containerId || 'install-instructions');
+    if (!container) return;
+    
+    const device = getDeviceType();
+    
+    if (device === 'ios') {
+      container.innerHTML = `
+        <div class="install-step">
+          <div class="install-step-num">1</div>
+          <div class="install-step-text">Нажмите кнопку <strong>«Поделиться»</strong> <span class="install-badge">↑</span> внизу Safari</div>
+        </div>
+        <div class="install-step">
+          <div class="install-step-num">2</div>
+          <div class="install-step-text">Прокрутите вниз и нажмите <strong>«На экран „Домой“»</strong></div>
+        </div>
+        <div class="install-step">
+          <div class="install-step-num">3</div>
+          <div class="install-step-text">Нажмите <strong>«Добавить»</strong> в правом верхнем углу</div>
+        </div>
+      `;
+    } else if (device === 'android') {
+      container.innerHTML = `
+        <div class="install-step">
+          <div class="install-step-num">1</div>
+          <div class="install-step-text">Нажмите кнопку <strong>меню</strong> <span class="install-badge">⋮</span> в Chrome</div>
+        </div>
+        <div class="install-step">
+          <div class="install-step-num">2</div>
+          <div class="install-step-text">Нажмите <strong>«Установить приложение»</strong> или <strong>«Добавить на главный экран»</strong></div>
+        </div>
+        <div class="install-step">
+          <div class="install-step-num">3</div>
+          <div class="install-step-text">Нажмите <strong>«Установить»</strong> для подтверждения</div>
+        </div>
+      `;
+    } else {
+      container.innerHTML = `
+        <div class="install-step">
+          <div class="install-step-num">1</div>
+          <div class="install-step-text">Нажмите на <strong>значок установки</strong> <span class="install-badge">⊕</span> в адресной строке браузера</div>
+        </div>
+        <div class="install-step">
+          <div class="install-step-num">2</div>
+          <div class="install-step-text">Или откройте меню и выберите <strong>«Установить Kyro»</strong></div>
+        </div>
+        <div class="install-step">
+          <div class="install-step-num">3</div>
+          <div class="install-step-text">Нажмите <strong>«Установить»</strong>, чтобы добавить в приложения</div>
+        </div>
+      `;
+    }
+  }
+  
+  // 50 Reflection Questions
+  const REFLECTION_QUESTIONS = [
+    "Что бы ты делал(а) иначе, если бы знал(а), что тебя никто не осудит?",
+    "Ты живёшь своей жизнью или чужим представлением о ней?",
+    "От чего ты избегаешь, хотя знаешь, что это всё изменит?",
+    "Если бы ты умер(ла) сегодня, о чём бы ты пожалел(а), что не сделал(а)?",
+    "Как выглядит твой идеальный обычный вторник?",
+    "Что ты притворяешься, что не знаешь?",
+    "Кого тебе нужно простить, чтобы двигаться дальше?",
+    "Что бы подумал о твоей нынешней жизни ты в 10 лет?",
+    "С чем ты миришься, хотя не должен(на)?",
+    "Если бы деньги не имели значения, чем бы ты занимался(ась) прямо сейчас?",
+    "Какая одна привычка изменила бы твою жизнь, если бы ты её придерживался(ась)?",
+    "Соответствуют ли твои ежедневные действия долгосрочному видению?",
+    "Какую историю ты рассказываешь себе, которая тебя сдерживает?",
+    "Что бы ты попробовал(а), если бы знал(а), что не потерпишь неудачу?",
+    "Кем ты становишься благодаря своим нынешним привычкам?",
+    "Чего тебе будет стоить остаться прежним ещё год?",
+    "Чего ты боишься больше всего и почему?",
+    "Когда ты чувствуешь себя наиболее живым(ой)?",
+    "Что бы ты делал(а), если бы тебе осталось жить 5 лет?",
+    "Что ты раньше любил(а), но перестал(а) делать?",
+    "Ты строишь жизнь или просто зарабатываешь на неё?",
+    "За что тебя поблагодарит будущий(ая) ты, если начнёшь сегодня?",
+    "От чего тебе нужно отпустить?",
+    "Кто в твоей жизни заставляет тебя чувствовать себя настоящим(ой)?",
+    "В чём разница между тем, кто ты сейчас, и тем, кем хочешь стать?",
+    "Что бы ты сделал(а), если бы не боялся(ась) выглядеть глупо?",
+    "Какое убеждение ограничивает твой потенциал?",
+    "Ты гордишься тем, как провёл(а) время на этой неделе?",
+    "Что для тебя на самом деле значит успех — не для общества, а для тебя?",
+    "Чем ты жертвуешь ради здоровья, отношений или покоя?",
+    "Если бы ты мог(ла) освоить один навык, какой сильнее всего изменил бы твою жизнь?",
+    "Что бы ты делал(а) с двумя дополнительными часами в день?",
+    "На что самое важное ты сейчас не обращаешь внимания?",
+    "Когда ты в последний раз делал(а) что-то впервые?",
+    "Что сделало бы этот год незабываемым?",
+    "Ты бежишь к чему-то или от чего-то?",
+    "Какого разговора ты избегаешь?",
+    "Если бы у твоей жизни сейчас была тема, какой бы она была?",
+    "Чего тебе нужно больше в жизни? Чего меньше?",
+    "Что бы ты сделал(а), если бы полностью доверял(а) себе?",
+    "Ты больше создаёшь или потребляешь?",
+    "Какой самый маленький шаг ты мог(ла) бы сделать к своему видению?",
+    "За что бы ты боролся(ась), даже рискуя проиграть?",
+    "Когда ты чувствуешь себя наиболее спокойно?",
+    "Что в своей жизни ты мог(ла) бы упростить?",
+    "Ты тратишь время на то, что действительно важно?",
+    "Что бы ты сказал(а) себе в юности?",
+    "Что ты откладываешь, хотя это занимает меньше 10 минут?",
+    "Какое наследие ты хочешь оставить?",
+    "Если бы сегодня был первый день твоей новой жизни, что бы ты сделал(а)?"
+  ];
+
+  function hasCompletedOnboarding() {
+    return localStorage.getItem(ONBOARDING_KEY) === 'true';
+  }
+
+  function saveVisions() {
+    const antiVision = document.getElementById('anti-vision-input')?.value || '';
+    const vision = document.getElementById('vision-input')?.value || '';
+    const reflectionTime = document.getElementById('reflection-time-input')?.value || '08:00';
+    if (antiVision) localStorage.setItem(ANTI_VISION_KEY, antiVision);
+    if (vision) localStorage.setItem(VISION_KEY, vision);
+    localStorage.setItem(REFLECTION_TIME_KEY, reflectionTime);
+  }
+  
+  function getRandomQuestion() {
+    const index = Math.floor(Math.random() * REFLECTION_QUESTIONS.length);
+    return REFLECTION_QUESTIONS[index];
+  }
+  
+  function shouldShowReflection() {
+    const savedTime = localStorage.getItem(REFLECTION_TIME_KEY);
+    if (!savedTime) return false;
+    
+    const lastReflection = localStorage.getItem(LAST_REFLECTION_KEY);
+    const today = new Date().toISOString().slice(0, 10);
+    
+    // Already reflected today
+    if (lastReflection === today) return false;
+    
+    // Check if current time is within 2 hours of reflection time
+    const now = new Date();
+    const [hours, minutes] = savedTime.split(':').map(Number);
+    const reflectionDate = new Date();
+    reflectionDate.setHours(hours, minutes, 0, 0);
+    
+    const diffMs = now - reflectionDate;
+    const diffHours = diffMs / (1000 * 60 * 60);
+    
+    // Show if within 2 hours after the set time
+    return diffHours >= 0 && diffHours <= 2;
+  }
+  
+  function showReflectionModal() {
+    const modal = document.getElementById('reflection-modal');
+    const questionEl = document.getElementById('reflection-question');
+    questionEl.textContent = getRandomQuestion();
+    modal.classList.add('active');
+  }
+  
+  function hideReflectionModal() {
+    document.getElementById('reflection-modal').classList.remove('active');
+  }
+  
+  function markReflectionDone() {
+    const today = new Date().toISOString().slice(0, 10);
+    localStorage.setItem(LAST_REFLECTION_KEY, today);
+    hideReflectionModal();
+  }
+  
+  function setupReflectionModal() {
+    document.getElementById('reflection-skip')?.addEventListener('click', hideReflectionModal);
+    document.getElementById('reflection-done')?.addEventListener('click', markReflectionDone);
+  }
+  
+  function requestNotificationPermission() {
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+  }
+  
+  function scheduleNotificationCheck() {
+    // Check every minute if we should show a notification
+    setInterval(() => {
+      if (shouldShowReflection() && document.visibilityState === 'visible') {
+        showReflectionModal();
+      }
+    }, 60000);
+    
+    // Also try to send a system notification if app is in background
+    if ('Notification' in window && Notification.permission === 'granted') {
+      setInterval(() => {
+        const savedTime = localStorage.getItem(REFLECTION_TIME_KEY);
+        if (!savedTime) return;
+        
+        const lastReflection = localStorage.getItem(LAST_REFLECTION_KEY);
+        const today = new Date().toISOString().slice(0, 10);
+        if (lastReflection === today) return;
+        
+        const now = new Date();
+        const [hours, minutes] = savedTime.split(':').map(Number);
+        const currentHours = now.getHours();
+        const currentMinutes = now.getMinutes();
+        
+        // Trigger exactly at the set time (within 1 minute)
+        if (currentHours === hours && currentMinutes === minutes) {
+          new Notification('Kyro — Время для рефлексии', {
+            body: getRandomQuestion(),
+            icon: 'icons/icon-192.png',
+            tag: 'reflection-' + today
+          });
+        }
+      }, 60000);
+    }
+  }
+
+  function completeOnboarding() {
+    saveVisions();
+    localStorage.setItem(ONBOARDING_KEY, 'true');
+    document.getElementById('onboarding').classList.add('hidden');
+    document.getElementById('pin-lock').classList.add('visible');
+    setupPin();
+  }
+
+  function initOnboardingProgress() {
+    const container = document.getElementById('onboarding-progress');
+    container.innerHTML = '';
+    for (let i = 0; i < totalOnboardingScreens; i++) {
+      const dot = document.createElement('div');
+      dot.className = 'onboarding-dot' + (i === 0 ? ' active' : '');
+      container.appendChild(dot);
+    }
+  }
+
+  function updateOnboardingProgress(screenIndex) {
+    const dots = document.querySelectorAll('.onboarding-dot');
+    dots.forEach((dot, i) => {
+      dot.classList.toggle('active', i === screenIndex);
+    });
+  }
+
+  function setupCharCount(inputId, countId) {
+    const input = document.getElementById(inputId);
+    const countEl = document.getElementById(countId);
+    if (input && countEl) {
+      input.addEventListener('input', () => {
+        countEl.textContent = input.value.length;
+      });
+    }
+  }
+
+  function goToOnboardingScreen(index) {
+    const screens = document.querySelectorAll('.onboarding-screen');
+    screens.forEach(s => s.classList.remove('active'));
+    
+    const target = document.querySelector(`[data-screen="${index}"]`);
+    if (target) {
+      target.classList.add('active');
+      currentOnboardingScreen = index;
+      updateOnboardingProgress(index);
+      
+      // Show progress and skip after install screen
+      if (index >= 1) {
+        document.getElementById('onboarding-progress').classList.add('visible');
+        document.getElementById('onboarding-skip').classList.add('visible');
+      }
+      
+      // Animate quote on screen 1
+      if (index === 1) {
+        setTimeout(() => {
+          document.getElementById('onboarding-quote')?.classList.add('visible');
+        }, 400);
+        setTimeout(() => {
+          document.getElementById('quote-btn-wrapper')?.classList.add('visible');
+        }, 2000);
+      }
+    }
+  }
+
+  function setupOnboarding() {
+    if (hasCompletedOnboarding()) {
+      document.getElementById('onboarding').classList.add('hidden');
+      document.getElementById('pin-lock').classList.add('visible');
+      setupPin();
+      return;
+    }
+
+    initOnboardingProgress();
+    populateInstallInstructions();
+    
+    // Show logo at top immediately
+    setTimeout(() => {
+      document.getElementById('onboarding-logo').classList.add('visible');
+    }, 300);
+    
+    // If already running as standalone PWA, skip install screen and go to quote
+    if (isStandalone()) {
+      goToOnboardingScreen(1);
+    }
+
+    // Install screen buttons -> go to quote screen
+    document.getElementById('onboarding-next-install')?.addEventListener('click', () => {
+      goToOnboardingScreen(1);
+    });
+    document.getElementById('onboarding-skip-install')?.addEventListener('click', () => {
+      goToOnboardingScreen(1);
+    });
+
+    // Quote start button -> Screen 2
+    document.getElementById('onboarding-quote-start').addEventListener('click', () => {
+      goToOnboardingScreen(2);
+    });
+
+    // Skip button
+    document.getElementById('onboarding-skip').addEventListener('click', completeOnboarding);
+
+    // Continue buttons for screens 2-5
+    for (let i = 2; i <= 5; i++) {
+      const btn = document.getElementById(`onboarding-next-${i}`);
+      if (btn) {
+        btn.addEventListener('click', () => goToOnboardingScreen(i + 1));
+      }
+    }
+    
+    // Request notification permission on time picker screen
+    document.getElementById('onboarding-next-5')?.addEventListener('click', () => {
+      requestNotificationPermission();
+    });
+
+    // Setup character counters
+    setupCharCount('anti-vision-input', 'anti-char-count');
+    setupCharCount('vision-input', 'vision-char-count');
+
+    // Final enter button
+    document.getElementById('onboarding-start').addEventListener('click', completeOnboarding);
+  }
+
+  // -------- PIN Lock --------
+  const PIN_STORAGE = 'kyro_pin';
+  let pinEntry = '';
+  let pinMode = 'check'; // 'check', 'set', 'confirm'
+  let pinFirst = '';
+
+  function hashPin(p) {
+    let h = 0;
+    for (let i = 0; i < p.length; i++) h = ((h << 5) - h) + p.charCodeAt(i) | 0;
+    return h.toString();
+  }
+
+  function updateDots() {
+    const dots = document.querySelectorAll('.pin-dot');
+    dots.forEach((d, i) => {
+      d.classList.remove('filled', 'error');
+      if (i < pinEntry.length) d.classList.add('filled');
+    });
+  }
+
+  function pinError() {
+    document.querySelectorAll('.pin-dot').forEach(d => d.classList.add('error'));
+    setTimeout(() => { pinEntry = ''; updateDots(); }, 300);
+  }
+
+  function unlockApp() {
+    document.getElementById('pin-lock').classList.remove('visible');
+    document.getElementById('pin-lock').classList.add('hidden');
+    document.querySelector('.app-shell').style.display = '';
+    initApp();
+  }
+
+  function handlePin(key) {
+    if (key === '←') { pinEntry = pinEntry.slice(0, -1); updateDots(); return; }
+    if (pinEntry.length >= 4) return;
+    pinEntry += key;
+    updateDots();
+
+    if (pinEntry.length === 4) {
+      setTimeout(() => {
+        const stored = localStorage.getItem(PIN_STORAGE);
+        if (!stored) {
+          // Setting new PIN
+          if (pinMode === 'set') {
+            pinFirst = pinEntry;
+            pinEntry = '';
+            pinMode = 'confirm';
+            document.getElementById('pin-msg').textContent = 'Подтвердите PIN';
+            updateDots();
+          } else if (pinMode === 'confirm') {
+            if (pinEntry === pinFirst) {
+              localStorage.setItem(PIN_STORAGE, hashPin(pinEntry));
+              unlockApp();
+            } else {
+              pinError();
+              pinMode = 'set';
+              document.getElementById('pin-msg').textContent = 'Не совпадает. Попробуйте снова';
+            }
+          }
+        } else {
+          // Checking PIN
+          if (hashPin(pinEntry) === stored) {
+            unlockApp();
+          } else {
+            pinError();
+            document.getElementById('pin-msg').textContent = 'Неверный PIN';
+          }
+        }
+      }, 100);
+    }
+  }
+
+  function setupPin() {
+    const stored = localStorage.getItem(PIN_STORAGE);
+    if (!stored) {
+      pinMode = 'set';
+      document.getElementById('pin-msg').textContent = 'Придумайте PIN';
+    }
+    document.getElementById('pin-pad').addEventListener('click', e => {
+      if (e.target.classList.contains('pin-btn') && !e.target.classList.contains('empty')) {
+        handlePin(e.target.textContent);
+      }
+    });
+  }
+
+  let state = {
+    tasks: [],
+    goals: [],
+    goalAchievements: [],
+    rewards: [],
+    completions: [],
+    redemptions: [],
+  };
+
+  let selectedStreakTaskId = null;
+  let selectedTaskDate = null; // For week view in Execute tab
+
+  // -------- Install (Add to Home Screen) --------
+  const INSTALL_DISMISSED_KEY = 'kyro_install_banner_dismissed';
+  let deferredInstallPrompt = null;
+
+  // Capture the native install prompt as early as possible (Chrome/Edge/Android).
+  // This listener must be registered at the top level, not inside initApp(),
+  // because the browser can fire it before the PIN screen is unlocked.
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    updateInstallBannerVisibility();
+  });
+
+  window.addEventListener('appinstalled', () => {
+    deferredInstallPrompt = null;
+    localStorage.setItem(INSTALL_DISMISSED_KEY, 'true');
+    document.getElementById('install-banner')?.classList.add('hidden');
+  });
+
+  function updateInstallBannerVisibility() {
+    const banner = document.getElementById('install-banner');
+    if (!banner) return;
+    if (isStandalone() || localStorage.getItem(INSTALL_DISMISSED_KEY) === 'true') {
+      banner.classList.add('hidden');
+    } else {
+      banner.classList.remove('hidden');
+    }
+  }
+
+  function setupInstallBanner() {
+    updateInstallBannerVisibility();
+
+    document.getElementById('install-banner-btn')?.addEventListener('click', async () => {
+      if (deferredInstallPrompt) {
+        // Chrome / Edge / Android: trigger the real native install prompt
+        deferredInstallPrompt.prompt();
+        try { await deferredInstallPrompt.userChoice; } catch (e) {}
+        deferredInstallPrompt = null;
+        updateInstallBannerVisibility();
+      } else {
+        // iOS Safari / other browsers with no native prompt: show manual steps
+        populateInstallInstructions('install-modal-instructions');
+        document.getElementById('install-modal')?.classList.add('active');
+      }
+    });
+
+    document.getElementById('install-banner-close')?.addEventListener('click', () => {
+      localStorage.setItem(INSTALL_DISMISSED_KEY, 'true');
+      document.getElementById('install-banner')?.classList.add('hidden');
+    });
+
+    document.getElementById('install-modal-close')?.addEventListener('click', () => {
+      document.getElementById('install-modal')?.classList.remove('active');
+    });
+
+    document.getElementById('install-modal')?.addEventListener('click', (e) => {
+      if (e.target.id === 'install-modal') {
+        document.getElementById('install-modal').classList.remove('active');
+      }
+    });
+  }
+
+  // -------- Persistence --------
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        state = Object.assign(state, parsed);
+      }
+    } catch(e) {
+      console.error('load error', e);
+    }
+  }
+
+  function saveState() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+
+  // -------- Helpers --------
+
+  function todayISO() {
+    const d = new Date();
+    d.setHours(0,0,0,0);
+    return d.toISOString().slice(0,10);
+  }
+
+  function formatDateShort(iso) {
+    const d = new Date(iso + 'T00:00:00');
+    return `${WEEKDAYS[d.getDay()]} ${d.getMonth()+1}/${d.getDate()}`;
+  }
+
+  function uuid() {
+    return 'id-' + Math.random().toString(36).slice(2,10) + Date.now().toString(36);
+  }
+
+  // XSS protection - escape HTML in user-provided content
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  function sumPointsByType(type) {
+    return state.completions.reduce((sum, c) => {
+      const task = state.tasks.find(t => t.id === c.taskId);
+      if (!task || task.type !== type) return sum;
+      return sum + (task.points || 0);
+    }, 0);
+  }
+
+  function totalPunishmentOffset() {
+    return state.completions.reduce((sum, c) => {
+      const task = state.tasks.find(t => t.id === c.taskId);
+      if (!task || task.type !== 'punishment') return sum;
+      return sum + (task.points || 0);
+    }, 0);
+  }
+
+  // Data integrity check - cleans up corrupted data on load
+  function sanitizeData() {
+    let changed = false;
+    
+    // 1. Remove orphaned completions (task no longer exists)
+    const validTaskIds = new Set(state.tasks.map(t => t.id));
+    const beforeCompletions = state.completions.length;
+    state.completions = state.completions.filter(c => validTaskIds.has(c.taskId));
+    if (state.completions.length !== beforeCompletions) changed = true;
+    
+    // 2. Cap penalty completions to not exceed anti debt
+    const antiTotal = sumPointsByType('anti');
+    let penaltyTotal = 0;
+    const penaltyCompletions = [];
+    const otherCompletions = [];
+    
+    state.completions.forEach(c => {
+      const task = state.tasks.find(t => t.id === c.taskId);
+      if (task && task.type === 'punishment') {
+        penaltyCompletions.push({ completion: c, points: task.points || 0 });
+      } else {
+        otherCompletions.push(c);
+      }
+    });
+    
+    // Keep only enough penalty completions to offset anti (not more)
+    const keptPenalties = [];
+    for (const p of penaltyCompletions) {
+      if (penaltyTotal + p.points <= antiTotal) {
+        keptPenalties.push(p.completion);
+        penaltyTotal += p.points;
+      } else if (penaltyTotal < antiTotal) {
+        // Partial - keep this one but it will be capped in calculation anyway
+        keptPenalties.push(p.completion);
+        penaltyTotal += p.points;
+        break;
+      }
+      // Skip the rest - they exceed anti debt
+    }
+    
+    if (keptPenalties.length !== penaltyCompletions.length) {
+      state.completions = [...otherCompletions, ...keptPenalties];
+      changed = true;
+    }
+    
+    // 3. Cap redemptions to not exceed earned points
+    const totalEarned = sumPointsByType('positive') + (state.goalAchievements || []).reduce((sum, a) => {
+      const goal = state.goals.find(g => g.id === a.goalId);
+      return sum + (goal ? goal.points : a.points || 0);
+    }, 0);
+    
+    let redeemedTotal = 0;
+    const rewardRedemptions = state.redemptions.filter(r => r.type === 'reward' || (!r.type && r.rewardId));
+    const otherRedemptions = state.redemptions.filter(r => r.type !== 'reward' && !(!r.type && r.rewardId));
+    
+    const keptRedemptions = [];
+    for (const r of rewardRedemptions) {
+      if (redeemedTotal + (r.cost || 0) <= totalEarned) {
+        keptRedemptions.push(r);
+        redeemedTotal += r.cost || 0;
+      }
+      // Skip redemptions that would exceed earned points
+    }
+    
+    if (keptRedemptions.length !== rewardRedemptions.length) {
+      state.redemptions = [...otherRedemptions, ...keptRedemptions];
+      changed = true;
+    }
+    
+    if (changed) {
+      saveState();
+      console.log('Data sanitized: removed invalid/excess entries');
+    }
+  }
+
+  function totalRedeemed() {
+    return state.redemptions
+      .filter(r => r.type === 'reward' || (!r.type && r.rewardId)) // Only count rewards
+      .reduce((sum,r) => sum + (r.cost || 0), 0);
+  }
+
+  function totalGoalPoints() {
+    if (!state.goalAchievements) return 0;
+    return state.goalAchievements.reduce((sum, a) => {
+      const goal = state.goals.find(g => g.id === a.goalId);
+      return sum + (goal ? goal.points : a.points || 0);
+    }, 0);
+  }
+
+  function netPoints() {
+    const pos = sumPointsByType('positive');
+    const goalPts = totalGoalPoints();
+    const anti = sumPointsByType('anti');
+    const offset = totalPunishmentOffset();
+    // Cap offset at anti amount - penalties can clear debt but not go beyond
+    const effectiveOffset = Math.min(offset, anti);
+    // Formula: (earned points) - (remaining debt) - (spent on rewards)
+    // = (pos + goals) - (anti - offset) - redeemed
+    return pos + goalPts - (anti - effectiveOffset) - totalRedeemed();
+  }
+
+  function isTaskDoneOnDate(taskId, iso) {
+    return state.completions.some(c => c.taskId === taskId && c.date === iso);
+  }
+
+  function toggleCompletion(taskId) {
+    const iso = todayISO();
+    const idx = state.completions.findIndex(c => c.taskId === taskId && c.date === iso);
+    if (idx >= 0) {
+      state.completions.splice(idx,1);
+    } else {
+      state.completions.push({ id:uuid(), taskId, date: iso });
+    }
+    saveState();
+    refreshAll();
+  }
+
+  function calcStreak(taskId) {
+    const task = state.tasks.find(t => t.id === taskId);
+    if (!task) return { current:0, best:0 };
+
+    const dates = state.completions.filter(c => c.taskId === taskId).map(c => c.date);
+    if (dates.length === 0) return { current:0, best:0 };
+
+    const dateSet = new Set(dates);
+    const today = new Date();
+    today.setHours(0,0,0,0);
+
+    // current streak
+    let current = 0;
+    let cursor = new Date(today);
+    for (let i=0;i<365;i++) {
+      const weekday = cursor.getDay();
+      const scheduled = task.daysOfWeek.length === 0 || task.daysOfWeek.includes(weekday);
+      if (!scheduled) {
+        cursor.setDate(cursor.getDate()-1);
+        continue;
+      }
+      const iso = cursor.toISOString().slice(0,10);
+      if (dateSet.has(iso)) {
+        current++;
+        cursor.setDate(cursor.getDate()-1);
+      } else {
+        break;
+      }
+    }
+
+    // best streak last 365 days
+    let best = 0;
+    let streak = 0;
+    const start = new Date(today);
+    start.setDate(start.getDate()-364);
+    const loopDate = new Date(start);
+
+    for (let i=0;i<365;i++) {
+      const weekday = loopDate.getDay();
+      const scheduled = task.daysOfWeek.length === 0 || task.daysOfWeek.includes(weekday);
+      if (!scheduled) {
+        loopDate.setDate(loopDate.getDate()+1);
+        continue;
+      }
+      const iso = loopDate.toISOString().slice(0,10);
+      if (dateSet.has(iso)) {
+        streak++;
+        if (streak > best) best = streak;
+      } else {
+        streak = 0;
+      }
+      loopDate.setDate(loopDate.getDate()+1);
+    }
+
+    return { current, best };
+  }
+
+  function getPositiveTasks() {
+    return state.tasks.filter(t => t.type === 'positive');
+  }
+  function getAntiTasks() {
+    return state.tasks.filter(t => t.type === 'anti');
+  }
+  function getPunishmentTasks() {
+    return state.tasks.filter(t => t.type === 'punishment');
+  }
+
+  function getTodaysProgress() {
+    const today = new Date();
+    const weekday = today.getDay();
+    const iso = todayISO();
+    const scheduled = getPositiveTasks().filter(t =>
+      t.daysOfWeek.length === 0 || t.daysOfWeek.includes(weekday)
+    );
+    const done = scheduled.filter(t => isTaskDoneOnDate(t.id, iso)).length;
+    return { done, total: scheduled.length };
+  }
+
+  function getWeekCompletionRate() {
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    let totalScheduled = 0;
+    let totalDone = 0;
+    
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(today);
+      d.setDate(d.getDate() - i);
+      const iso = d.toISOString().slice(0,10);
+      const weekday = d.getDay();
+      
+      const scheduled = getPositiveTasks().filter(t =>
+        t.daysOfWeek.length === 0 || t.daysOfWeek.includes(weekday)
+      );
+      totalScheduled += scheduled.length;
+      totalDone += scheduled.filter(t => isTaskDoneOnDate(t.id, iso)).length;
+    }
+    
+    if (totalScheduled === 0) return 0;
+    return Math.round((totalDone / totalScheduled) * 100);
+  }
+
+  function getAntiFreeDays() {
+    // Count consecutive days without anti-task completions (going backwards from today)
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    let streak = 0;
+    
+    const antiTaskIds = new Set(getAntiTasks().map(t => t.id));
+    const antiDates = new Set(
+      state.completions
+        .filter(c => antiTaskIds.has(c.taskId))
+        .map(c => c.date)
+    );
+    
+    for (let i = 0; i < 365; i++) {
+      const d = new Date(today);
+      d.setDate(d.getDate() - i);
+      const iso = d.toISOString().slice(0,10);
+      
+      if (antiDates.has(iso)) {
+        break;
+      }
+      streak++;
+    }
+    return streak;
+  }
+
+  function getTotalActiveDays() {
+    // Days with at least one positive task completed
+    const posTaskIds = new Set(getPositiveTasks().map(t => t.id));
+    const dates = new Set(
+      state.completions
+        .filter(c => posTaskIds.has(c.taskId))
+        .map(c => c.date)
+    );
+    return dates.size;
+  }
+
+  // -------- Settings Modal --------
+
+  let activeSettingsSection = 'general';
+
+  function renderSettings() {
+    const container = document.getElementById('settings-content');
+    container.innerHTML = '';
+
+    // Section Navigation
+    const nav = document.createElement('div');
+    nav.className = 'settings-nav';
+    const sections = [
+      { id: 'general', label: 'Общие' },
+      { id: 'vision', label: 'Видение' },
+      { id: 'reflect', label: 'Рефлексия' },
+      { id: 'tasks', label: 'Задачи' },
+      { id: 'goals', label: 'Цели' },
+      { id: 'enemies', label: 'Враги' },
+      { id: 'atonements', label: 'Штрафы' },
+      { id: 'rewards', label: 'Награды' }
+    ];
+    
+    sections.forEach(s => {
+      const btn = document.createElement('button');
+      btn.className = 'settings-nav-btn' + (activeSettingsSection === s.id ? ' active' : '');
+      btn.textContent = s.label;
+      btn.addEventListener('click', () => {
+        activeSettingsSection = s.id;
+        renderSettings();
+      });
+      nav.appendChild(btn);
+    });
+    container.appendChild(nav);
+
+    // ===== GENERAL SECTION =====
+    if (activeSettingsSection === 'general') {
+      const backupCard = document.createElement('div');
+      backupCard.className = 'card';
+      backupCard.innerHTML = `
+        <div class="section-title"><span class="icon">☁</span> Резервная копия</div>
+        <p class="small" style="margin-bottom:16px;color:var(--text-muted);">Экспортируйте данные регулярно!</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn" id="export-btn" style="flex:1;min-width:100px;">↓ Экспорт</button>
+          <label class="btn ghost" style="flex:1;min-width:100px;text-align:center;cursor:pointer;">
+            ↑ Импорт
+            <input type="file" id="import-input" accept=".json" style="display:none;" />
+          </label>
+        </div>
+        <p id="backup-status" class="small" style="margin-top:12px;color:var(--emerald);display:none;"></p>
+      `;
+
+      backupCard.querySelector('#export-btn').addEventListener('click', () => {
+        const exportData = {
+          ...state,
+          vision: localStorage.getItem(VISION_KEY) || '',
+          antiVision: localStorage.getItem(ANTI_VISION_KEY) || '',
+          reflectionTime: localStorage.getItem(REFLECTION_TIME_KEY) || '08:00'
+        };
+        const dataStr = JSON.stringify(exportData, null, 2);
+        const blob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `kyro-backup-${new Date().toISOString().slice(0,10)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        const status = backupCard.querySelector('#backup-status');
+        status.textContent = '✓ Экспортировано!';
+        status.style.display = 'block';
+        setTimeout(() => { status.style.display = 'none'; }, 3000);
+      });
+
+      backupCard.querySelector('#import-input').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          try {
+            const imported = JSON.parse(ev.target.result);
+            if (!imported.tasks || !Array.isArray(imported.tasks)) throw new Error('Invalid');
+            if (!confirm('Заменить все данные? Это перезапишет текущие задачи, цели, награды и видения.')) return;
+            Object.assign(state, {
+              tasks: imported.tasks || [],
+              completions: imported.completions || [],
+              rewards: imported.rewards || [],
+              redemptions: imported.redemptions || [],
+              goals: imported.goals || [],
+              goalAchievements: imported.goalAchievements || []
+            });
+            // Restore vision, anti-vision, and reflection time
+            if (imported.vision !== undefined) {
+              localStorage.setItem(VISION_KEY, imported.vision);
+            }
+            if (imported.antiVision !== undefined) {
+              localStorage.setItem(ANTI_VISION_KEY, imported.antiVision);
+            }
+            if (imported.reflectionTime !== undefined) {
+              localStorage.setItem(REFLECTION_TIME_KEY, imported.reflectionTime);
+            }
+            saveState();
+            refreshAll();
+            renderSettings();
+            const status = backupCard.querySelector('#backup-status');
+            status.textContent = '✓ Данные восстановлены!';
+            status.style.color = 'var(--emerald)';
+            status.style.display = 'block';
+            setTimeout(() => { status.style.display = 'none'; }, 3000);
+          } catch (err) {
+            alert('Неверный файл резервной копии.');
+          }
+        };
+        reader.readAsText(file);
+        e.target.value = ''; // Reset so same file can be imported again
+      });
+
+      const pinCard = document.createElement('div');
+      pinCard.className = 'card';
+      pinCard.innerHTML = `
+        <div class="section-title"><span class="icon">🔐</span> Безопасность</div>
+        <button class="btn ghost danger" id="reset-pin-btn" style="width:100%;">Сбросить PIN</button>
+      `;
+      pinCard.querySelector('#reset-pin-btn').addEventListener('click', () => {
+        if (!confirm('Сбросить PIN?')) return;
+        localStorage.removeItem('kyro_pin');
+        alert('PIN удалён. Перезагрузите страницу, чтобы задать новый.');
+      });
+
+      container.appendChild(backupCard);
+      container.appendChild(pinCard);
+    }
+
+    // ===== VISION SECTION =====
+    if (activeSettingsSection === 'vision') {
+      const currentVision = localStorage.getItem(VISION_KEY) || '';
+      const currentAntiVision = localStorage.getItem(ANTI_VISION_KEY) || '';
+
+      const visionCard = document.createElement('div');
+      visionCard.className = 'card';
+      visionCard.innerHTML = `
+        <div class="section-title"><span class="icon gold">★</span> Твоё видение</div>
+        <p class="small" style="margin-bottom:12px;color:var(--text-muted);">Лучший сценарий. Жизнь, которую ты строишь.</p>
+        <textarea id="vision-edit" style="width:100%;min-height:100px;padding:12px;border-radius:8px;border:1px solid var(--border-subtle);background:var(--bg-soft);color:var(--text-main);font-size:14px;font-family:inherit;line-height:1.6;resize:vertical;outline:none;">${currentVision}</textarea>
+        <button class="btn" id="save-vision-btn" style="margin-top:12px;width:100%;">Сохранить видение</button>
+      `;
+      visionCard.querySelector('#save-vision-btn').addEventListener('click', () => {
+        const val = visionCard.querySelector('#vision-edit').value.trim();
+        localStorage.setItem(VISION_KEY, val);
+        alert('Видение сохранено!');
+        refreshAll();
+      });
+
+      const antiVisionCard = document.createElement('div');
+      antiVisionCard.className = 'card';
+      antiVisionCard.innerHTML = `
+        <div class="section-title"><span class="icon red">⚔</span> Твоё антивидение</div>
+        <p class="small" style="margin-bottom:12px;color:var(--text-muted);">Худший сценарий. Что случится, если ничего не изменить.</p>
+        <textarea id="antivision-edit" style="width:100%;min-height:100px;padding:12px;border-radius:8px;border:1px solid var(--border-subtle);background:var(--bg-soft);color:var(--text-main);font-size:14px;font-family:inherit;line-height:1.6;resize:vertical;outline:none;border-color:rgba(239,68,68,0.3);">${currentAntiVision}</textarea>
+        <button class="btn" id="save-antivision-btn" style="margin-top:12px;width:100%;">Сохранить антивидение</button>
+      `;
+      antiVisionCard.querySelector('#save-antivision-btn').addEventListener('click', () => {
+        const val = antiVisionCard.querySelector('#antivision-edit').value.trim();
+        localStorage.setItem(ANTI_VISION_KEY, val);
+        alert('Антивидение сохранено!');
+        refreshAll();
+      });
+
+      container.appendChild(visionCard);
+      container.appendChild(antiVisionCard);
+    }
+
+    // ===== REFLECT SECTION =====
+    if (activeSettingsSection === 'reflect') {
+      const currentTime = localStorage.getItem(REFLECTION_TIME_KEY) || '08:00';
+      
+      const timeCard = document.createElement('div');
+      timeCard.className = 'card';
+      timeCard.innerHTML = `
+        <div class="section-title"><span class="icon gold">◐</span> Время рефлексии</div>
+        <p class="small" style="margin-bottom:16px;color:var(--text-muted);">Выбери время для ежедневного вопроса-рефлексии.</p>
+        <div style="display:flex;gap:12px;align-items:center;">
+          <input type="time" id="reflection-time-edit" value="${currentTime}" style="flex:1;font-size:18px;padding:12px;text-align:center;" />
+          <button class="btn" id="save-reflection-time">Сохранить</button>
+        </div>
+      `;
+      timeCard.querySelector('#save-reflection-time').addEventListener('click', () => {
+        const val = timeCard.querySelector('#reflection-time-edit').value;
+        localStorage.setItem(REFLECTION_TIME_KEY, val);
+        alert('Время рефлексии сохранено!');
+      });
+      
+      const reflectNowCard = document.createElement('div');
+      reflectNowCard.className = 'card';
+      reflectNowCard.innerHTML = `
+        <div class="section-title"><span class="icon">💭</span> Рефлексия сейчас</div>
+        <p class="small" style="margin-bottom:16px;color:var(--text-muted);">Получить случайный вопрос для размышления.</p>
+        <button class="btn" id="reflect-now-btn" style="width:100%;">Показать вопрос</button>
+      `;
+      reflectNowCard.querySelector('#reflect-now-btn').addEventListener('click', () => {
+        document.getElementById('settings-modal').classList.remove('active');
+        showReflectionModal();
+      });
+      
+      const notifCard = document.createElement('div');
+      notifCard.className = 'card';
+      const notifStatus = 'Notification' in window 
+        ? (Notification.permission === 'granted' ? '✓ Включены' : Notification.permission === 'denied' ? '✗ Заблокированы' : 'Не настроены')
+        : 'Не поддерживаются';
+      const notifColor = notifStatus === '✓ Включены' ? 'var(--emerald)' : 'var(--text-dim)';
+      notifCard.innerHTML = `
+        <div class="section-title"><span class="icon">🔔</span> Уведомления</div>
+        <p class="small" style="margin-bottom:12px;color:var(--text-muted);">Статус: <span style="color:${notifColor};">${notifStatus}</span></p>
+        ${Notification.permission === 'default' ? '<button class="btn ghost" id="enable-notif-btn" style="width:100%;">Включить уведомления</button>' : ''}
+        ${Notification.permission === 'denied' ? '<p class="small" style="color:var(--crimson);">Уведомления заблокированы. Включите их в настройках браузера.</p>' : ''}
+      `;
+      if (Notification.permission === 'default') {
+        notifCard.querySelector('#enable-notif-btn')?.addEventListener('click', () => {
+          requestNotificationPermission();
+          setTimeout(() => renderSettings(), 500);
+        });
+      }
+      
+      container.appendChild(timeCard);
+      container.appendChild(reflectNowCard);
+      container.appendChild(notifCard);
+    }
+
+    // ===== TASKS SECTION =====
+    if (activeSettingsSection === 'tasks') {
+      const tasksCard = document.createElement('div');
+      tasksCard.className = 'card';
+      tasksCard.innerHTML = `
+        <div class="section-title"><span class="icon green">✓</span> Добавить задачу</div>
+        <div style="margin-bottom:12px;">
+          <label>Название</label>
+          <input id="task-name" placeholder="напр. Спортзал, Глубокая работа, Чтение" />
+        </div>
+        <div style="margin-bottom:12px;">
+          <label>Очки</label>
+          <input id="task-points" type="number" value="5"/>
+        </div>
+        <div style="margin-bottom:12px;">
+          <label>Дни недели</label>
+          <div id="weekday-picker-pos" class="weekday-chips"></div>
+          <div class="small" style="margin-top:4px;">Ничего не выбрано = каждый день</div>
+        </div>
+        <button class="btn" id="add-task-btn">Добавить задачу</button>
+      `;
+
+      const picker = tasksCard.querySelector('#weekday-picker-pos');
+      const selectedSet = new Set([1,2,3,4,5]);
+      WEEKDAYS.forEach((label,i) => {
+        const span = document.createElement('span');
+        span.className = 'weekday' + (selectedSet.has(i)?' selected':'');
+        span.textContent = label;
+        span.addEventListener('click', () => {
+          selectedSet.has(i) ? selectedSet.delete(i) : selectedSet.add(i);
+          span.classList.toggle('selected');
+        });
+        picker.appendChild(span);
+      });
+
+      tasksCard.querySelector('#add-task-btn').addEventListener('click', () => {
+        const name = tasksCard.querySelector('#task-name').value.trim();
+        const points = parseInt(tasksCard.querySelector('#task-points').value || '0',10);
+        if (!name || !points) { alert('Нужны название и очки.'); return; }
+        state.tasks.push({ id:uuid(), name, type:'positive', points, daysOfWeek: Array.from(selectedSet) });
+        saveState(); refreshAll(); renderSettings();
+      });
+
+      const tasksList = document.createElement('div');
+      tasksList.className = 'card';
+      tasksList.innerHTML = `<div class="section-title"><span class="icon green">✓</span> Твои задачи</div>`;
+      const allTasks = getPositiveTasks();
+      if (allTasks.length === 0) {
+        tasksList.innerHTML += `<p class="small">Пока нет задач.</p>`;
+      } else {
+        allTasks.forEach(task => {
+          const row = document.createElement('div');
+          row.className = 'row';
+          const daysLabel = task.daysOfWeek.length ? task.daysOfWeek.map(d=>WEEKDAYS[d]).join(', ') : 'Каждый день';
+          row.innerHTML = `
+            <div style="flex:1;">
+              <div style="font-size:14px;font-weight:500;">${escapeHtml(task.name)}</div>
+              <div class="badges"><span class="pill green">+${task.points}</span><span class="pill subtle">${daysLabel}</span></div>
+            </div>
+            <button class="btn small ghost">Удалить</button>
+          `;
+          row.querySelector('button').addEventListener('click', () => {
+            if (!confirm('Удалить?')) return;
+            state.tasks = state.tasks.filter(t => t.id !== task.id);
+            state.completions = state.completions.filter(c => c.taskId !== task.id);
+            saveState(); refreshAll(); renderSettings();
+          });
+          tasksList.appendChild(row);
+        });
+      }
+      container.appendChild(tasksCard);
+      container.appendChild(tasksList);
+    }
+
+    // ===== GOALS SECTION =====
+    if (activeSettingsSection === 'goals') {
+      const goalsCard = document.createElement('div');
+      goalsCard.className = 'card';
+      goalsCard.innerHTML = `
+        <div class="section-title"><span class="icon green">⚑</span> Добавить цель</div>
+        <div style="margin-bottom:12px;">
+          <label>Название цели</label>
+          <input id="goal-name" placeholder="напр. Пробежать марафон" />
+        </div>
+        <div style="margin-bottom:12px;">
+          <label>Очки за выполнение</label>
+          <input id="goal-points" type="number" value="50" />
+        </div>
+        <button class="btn" id="add-goal-btn">Добавить цель</button>
+      `;
+
+      goalsCard.querySelector('#add-goal-btn').addEventListener('click', () => {
+        const name = goalsCard.querySelector('#goal-name').value.trim();
+        const points = parseInt(goalsCard.querySelector('#goal-points').value || '0',10);
+        if (!name || !points) { alert('Нужны название и очки.'); return; }
+        if (!state.goals) state.goals = [];
+        state.goals.push({ id:uuid(), name, points });
+        saveState(); refreshAll(); renderSettings();
+      });
+
+      const goalsList = document.createElement('div');
+      goalsList.className = 'card';
+      goalsList.innerHTML = `<div class="section-title"><span class="icon green">⚑</span> Твои цели</div>`;
+      const allGoals = state.goals || [];
+      const achievedGoalIds = new Set((state.goalAchievements || []).map(a => a.goalId));
+      if (allGoals.length === 0) {
+        goalsList.innerHTML += `<p class="small">Пока нет целей.</p>`;
+      } else {
+        allGoals.forEach(goal => {
+          const isAchieved = achievedGoalIds.has(goal.id);
+          const row = document.createElement('div');
+          row.className = 'row';
+          row.innerHTML = `
+            <div style="flex:1;">
+              <div style="font-size:14px;font-weight:500;${isAchieved?'text-decoration:line-through;color:var(--text-dim);':''}">${escapeHtml(goal.name)}</div>
+              <div class="badges"><span class="pill ${isAchieved?'subtle':'gold'}">+${goal.points}</span>${isAchieved?'<span class="pill green">Достигнуто</span>':''}</div>
+            </div>
+            <button class="btn small ghost">Удалить</button>
+          `;
+          row.querySelector('button').addEventListener('click', () => {
+            if (!confirm('Удалить?')) return;
+            state.goals = state.goals.filter(g => g.id !== goal.id);
+            if (state.goalAchievements) state.goalAchievements = state.goalAchievements.filter(a => a.goalId !== goal.id);
+            saveState(); refreshAll(); renderSettings();
+          });
+          goalsList.appendChild(row);
+        });
+      }
+      container.appendChild(goalsCard);
+      container.appendChild(goalsList);
+    }
+
+    // ===== ENEMIES SECTION =====
+    if (activeSettingsSection === 'enemies') {
+      const antiCard = document.createElement('div');
+      antiCard.className = 'card';
+      antiCard.innerHTML = `
+        <div class="section-title"><span class="icon red">⚔</span> Добавить врага</div>
+        <div style="margin-bottom:12px;">
+          <label>Название</label>
+          <input id="anti-name" placeholder="напр. Фастфуд, Бесконечный скроллинг" />
+        </div>
+        <div style="margin-bottom:12px;">
+          <label>Очки долга</label>
+          <input id="anti-points" type="number" value="5" />
+        </div>
+        <button class="btn" id="add-anti-btn">Добавить врага</button>
+      `;
+
+      antiCard.querySelector('#add-anti-btn').addEventListener('click', () => {
+        const name = antiCard.querySelector('#anti-name').value.trim();
+        const points = parseInt(antiCard.querySelector('#anti-points').value || '0',10);
+        if (!name || !points) { alert('Нужны название и очки.'); return; }
+        state.tasks.push({ id:uuid(), name, type:'anti', points, daysOfWeek:[] });
+        saveState(); refreshAll(); renderSettings();
+      });
+
+      const antiList = document.createElement('div');
+      antiList.className = 'card';
+      antiList.innerHTML = `<div class="section-title"><span class="icon red">⚔</span> Твои враги</div>`;
+      const allAnti = getAntiTasks();
+      if (allAnti.length === 0) {
+        antiList.innerHTML += `<p class="small">Пока нет врагов.</p>`;
+      } else {
+        allAnti.forEach(task => {
+          const row = document.createElement('div');
+          row.className = 'row';
+          row.innerHTML = `
+            <div style="flex:1;">
+              <div style="font-size:14px;font-weight:500;">${escapeHtml(task.name)}</div>
+              <div class="badges"><span class="pill red">+${task.points}</span></div>
+            </div>
+            <button class="btn small ghost danger">Удалить</button>
+          `;
+          row.querySelector('button').addEventListener('click', () => {
+            if (!confirm('Удалить?')) return;
+            state.tasks = state.tasks.filter(t => t.id !== task.id);
+            state.completions = state.completions.filter(c => c.taskId !== task.id);
+            saveState(); refreshAll(); renderSettings();
+          });
+          antiList.appendChild(row);
+        });
+      }
+      container.appendChild(antiCard);
+      container.appendChild(antiList);
+    }
+
+    // ===== ATONEMENTS SECTION =====
+    if (activeSettingsSection === 'atonements') {
+      const punishCard = document.createElement('div');
+      punishCard.className = 'card';
+      punishCard.innerHTML = `
+        <div class="section-title"><span class="icon purple">↺</span> Добавить штраф</div>
+        <div style="margin-bottom:12px;">
+          <label>Название</label>
+          <input id="punish-name" placeholder="напр. Холодный душ, Дополнительная тренировка" />
+        </div>
+        <div style="margin-bottom:12px;">
+          <label>Снижение долга</label>
+          <input id="punish-points" type="number" value="5" />
+        </div>
+        <button class="btn" id="add-punish-btn">Добавить штраф</button>
+      `;
+
+      punishCard.querySelector('#add-punish-btn').addEventListener('click', () => {
+        const name = punishCard.querySelector('#punish-name').value.trim();
+        const points = parseInt(punishCard.querySelector('#punish-points').value || '0',10);
+        if (!name || !points) { alert('Нужны название и очки.'); return; }
+        state.tasks.push({ id:uuid(), name, type:'punishment', points, daysOfWeek:[] });
+        saveState(); refreshAll(); renderSettings();
+      });
+
+      const punishList = document.createElement('div');
+      punishList.className = 'card';
+      punishList.innerHTML = `<div class="section-title"><span class="icon purple">↺</span> Твои штрафы</div>`;
+      const allPunish = getPunishmentTasks();
+      if (allPunish.length === 0) {
+        punishList.innerHTML += `<p class="small">Пока нет штрафов.</p>`;
+      } else {
+        allPunish.forEach(task => {
+          const row = document.createElement('div');
+          row.className = 'row';
+          row.innerHTML = `
+            <div style="flex:1;">
+              <div style="font-size:14px;font-weight:500;">${escapeHtml(task.name)}</div>
+              <div class="badges"><span class="pill violet">−${task.points} долга</span></div>
+            </div>
+            <button class="btn small ghost">Удалить</button>
+          `;
+          row.querySelector('button').addEventListener('click', () => {
+            if (!confirm('Удалить?')) return;
+            state.tasks = state.tasks.filter(t => t.id !== task.id);
+            state.completions = state.completions.filter(c => c.taskId !== task.id);
+            saveState(); refreshAll(); renderSettings();
+          });
+          punishList.appendChild(row);
+        });
+      }
+      container.appendChild(punishCard);
+      container.appendChild(punishList);
+    }
+
+    // ===== REWARDS SECTION =====
+    if (activeSettingsSection === 'rewards') {
+      const rewardsCard = document.createElement('div');
+      rewardsCard.className = 'card';
+      rewardsCard.innerHTML = `
+        <div class="section-title"><span class="icon gold">★</span> Добавить награду</div>
+        <div style="margin-bottom:12px;">
+          <label>Название</label>
+          <input id="reward-name" placeholder="напр. Доставка еды, Новая худи" />
+        </div>
+        <div style="margin-bottom:12px;">
+          <label>Стоимость (очки)</label>
+          <input id="reward-cost" type="number" value="20" />
+        </div>
+        <button class="btn" id="add-reward-btn">Добавить награду</button>
+      `;
+
+      rewardsCard.querySelector('#add-reward-btn').addEventListener('click', () => {
+        const name = rewardsCard.querySelector('#reward-name').value.trim();
+        const cost = parseInt(rewardsCard.querySelector('#reward-cost').value || '0',10);
+        if (!name || !cost) { alert('Нужны название и стоимость.'); return; }
+        state.rewards.push({ id:uuid(), name, cost });
+        saveState(); refreshAll(); renderSettings();
+      });
+
+      const rewardsList = document.createElement('div');
+      rewardsList.className = 'card';
+      rewardsList.innerHTML = `<div class="section-title"><span class="icon gold">★</span> Твои награды</div>`;
+      if (state.rewards.length === 0) {
+        rewardsList.innerHTML += `<p class="small">Пока нет наград.</p>`;
+      } else {
+        state.rewards.forEach(r => {
+          const row = document.createElement('div');
+          row.className = 'row';
+          row.innerHTML = `
+            <div style="flex:1;">
+              <div style="font-size:14px;font-weight:500;">${escapeHtml(r.name)}</div>
+              <div class="badges"><span class="pill gold">${r.cost} очк.</span></div>
+            </div>
+            <button class="btn small ghost">Удалить</button>
+          `;
+          row.querySelector('button').addEventListener('click', () => {
+            if (!confirm('Удалить?')) return;
+            state.rewards = state.rewards.filter(x => x.id !== r.id);
+            saveState(); refreshAll(); renderSettings();
+          });
+          rewardsList.appendChild(row);
+        });
+      }
+      container.appendChild(rewardsCard);
+      container.appendChild(rewardsList);
+    }
+  }
+
+  // -------- Tasks Tab (With Week View) --------
+
+  function renderTasksTab() {
+    const container = document.getElementById('tab-tasks');
+    container.innerHTML = '';
+
+    // Vision Card at top
+    const vision = localStorage.getItem(VISION_KEY);
+    const visionCard = document.createElement('div');
+    visionCard.className = 'vision-card';
+    if (vision && vision.trim()) {
+      visionCard.innerHTML = `
+        <div class="vision-card-label">Твоё видение</div>
+        <div class="vision-card-text">"${escapeHtml(vision.trim())}"</div>
+      `;
+    } else {
+      visionCard.innerHTML = `
+        <div class="vision-card-label">Твоё видение</div>
+        <div class="vision-card-empty">Опиши своё видение в Настройки → Видение</div>
+      `;
+    }
+    container.appendChild(visionCard);
+
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    const todayIso = today.toISOString().slice(0,10);
+    
+    // Default to today if no date selected
+    if (!selectedTaskDate) selectedTaskDate = todayIso;
+    
+    // Week View - scrollable days
+    const weekCard = document.createElement('div');
+    weekCard.className = 'week-scroll-container';
+    
+    const weekScroll = document.createElement('div');
+    weekScroll.className = 'week-scroll';
+    
+    // Generate 7 days starting from today
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(today);
+      d.setDate(d.getDate() + i);
+      const iso = d.toISOString().slice(0,10);
+      const dayName = WEEKDAYS[d.getDay()];
+      const dayNum = d.getDate();
+      const weekday = d.getDay();
+      
+      // Count tasks for this day
+      const tasksForDay = getPositiveTasks().filter(t =>
+      t.daysOfWeek.length === 0 || t.daysOfWeek.includes(weekday)
+    );
+
+      const isSelected = iso === selectedTaskDate;
+      const isToday = iso === todayIso;
+      
+      const dayEl = document.createElement('div');
+      dayEl.className = `week-day ${isSelected ? 'selected' : ''} ${isToday ? 'today' : ''}`;
+      dayEl.innerHTML = `
+        <div class="week-day-name">${dayName}</div>
+        <div class="week-day-num">${dayNum}</div>
+        <div class="week-day-count">${tasksForDay.length} задач${tasksForDay.length === 1 ? 'а' : (tasksForDay.length >= 2 && tasksForDay.length <= 4 ? 'и' : '')}</div>
+      `;
+      dayEl.addEventListener('click', () => {
+        selectedTaskDate = iso;
+        renderTasksTab();
+      });
+      weekScroll.appendChild(dayEl);
+    }
+    
+    weekCard.appendChild(weekScroll);
+    container.appendChild(weekCard);
+
+    // Tasks for selected day
+    const selectedDate = new Date(selectedTaskDate + 'T00:00:00');
+    const selectedWeekday = selectedDate.getDay();
+    const isViewingToday = selectedTaskDate === todayIso;
+    
+    const tasksForSelected = getPositiveTasks().filter(t =>
+      t.daysOfWeek.length === 0 || t.daysOfWeek.includes(selectedWeekday)
+    );
+
+    const todayCard = document.createElement('div');
+    todayCard.className = 'card';
+    
+    const dayLabel = isViewingToday ? "Сегодня" : `${WEEKDAYS[selectedWeekday]}, ${selectedDate.toLocaleDateString('ru-RU', { month: 'short', day: 'numeric' })}`;
+    
+    todayCard.innerHTML = `
+      <div class="section-title"><span class="icon green">✓</span> ${dayLabel}</div>
+    `;
+
+    if (tasksForSelected.length === 0) {
+      todayCard.innerHTML += `<p class="small">Нет запланированных задач.</p>`;
+    } else {
+      // Check if all tasks are complete for today
+      const allDone = isViewingToday && tasksForSelected.every(t => isTaskDoneOnDate(t.id, selectedTaskDate));
+      
+      if (allDone && tasksForSelected.length > 0) {
+        const victoryBanner = document.createElement('div');
+        victoryBanner.className = 'victory-banner';
+        victoryBanner.innerHTML = `
+          <div class="victory-icon">◆</div>
+          <div class="victory-text">Готово</div>
+        `;
+        todayCard.appendChild(victoryBanner);
+      }
+      
+      tasksForSelected.forEach(task => {
+        const row = document.createElement('div');
+        row.className = 'row';
+        const done = isTaskDoneOnDate(task.id, selectedTaskDate);
+
+        row.innerHTML = `
+          <div style="flex:1;">
+            <div style="font-size:15px;font-weight:500;${done ? 'text-decoration:line-through;color:var(--text-dim);' : ''}">
+              ${escapeHtml(task.name)}
+            </div>
+            <div class="badges">
+              <span class="pill green">+${task.points}</span>
+            </div>
+          </div>
+          ${isViewingToday 
+            ? `<button class="btn small ${done?'ghost':'green'}">${done?'Отменить':'Готово'}</button>`
+            : `<span class="pill ${done ? 'green' : 'subtle'}">${done ? '✓ Готово' : 'Ожидает'}</span>`
+          }
+        `;
+        if (isViewingToday) {
+        row.querySelector('button').addEventListener('click', () => toggleCompletion(task.id));
+        }
+        todayCard.appendChild(row);
+      });
+    }
+
+    container.appendChild(todayCard);
+  }
+
+  // -------- Goals Tab --------
+
+  function renderGoalsTab() {
+    const container = document.getElementById('tab-goals');
+    container.innerHTML = '';
+
+    if (!state.goals) state.goals = [];
+    if (!state.goalAchievements) state.goalAchievements = [];
+
+    const achievedGoalIds = new Set(state.goalAchievements.map(a => a.goalId));
+    const pendingGoals = state.goals.filter(g => !achievedGoalIds.has(g.id));
+
+    // Pending Goals
+    const goalsCard = document.createElement('div');
+    goalsCard.className = 'card';
+    goalsCard.innerHTML = `<div class="section-title"><span class="icon green">⚑</span> Активные цели</div>`;
+
+    if (pendingGoals.length === 0) {
+      goalsCard.innerHTML += `<p class="small">Пока нет целей.</p>`;
+    } else {
+      pendingGoals.forEach(goal => {
+        const row = document.createElement('div');
+        row.className = 'row';
+        row.innerHTML = `
+          <div style="flex:1;">
+            <div style="font-size:14px;font-weight:500;">${escapeHtml(goal.name)}</div>
+            <div class="badges">
+              <span class="pill gold">+${goal.points}</span>
+            </div>
+          </div>
+          <button class="btn small green">Достигнуто</button>
+        `;
+        row.querySelector('button').addEventListener('click', () => {
+          state.goalAchievements.push({
+            id: uuid(),
+            goalId: goal.id,
+            points: goal.points,
+            date: todayISO()
+          });
+            saveState();
+            refreshAll();
+        });
+        goalsCard.appendChild(row);
+      });
+    }
+
+    container.appendChild(goalsCard);
+
+    // Achieved Goals History
+    if (state.goalAchievements.length > 0) {
+      const historyCard = document.createElement('div');
+      historyCard.className = 'card';
+      historyCard.innerHTML = `<div class="section-title"><span class="icon green">✓</span> Достигнуто</div>`;
+
+      // Sort by date, most recent first
+      const sorted = state.goalAchievements.slice().sort((a, b) => b.date.localeCompare(a.date));
+      
+      sorted.forEach(achievement => {
+        const goal = state.goals.find(g => g.id === achievement.goalId);
+        if (!goal) return;
+        
+        const row = document.createElement('div');
+        row.className = 'row';
+        row.innerHTML = `
+          <div style="flex:1;">
+            <div style="font-size:14px;font-weight:500;color:var(--text-muted);">${escapeHtml(goal.name)}</div>
+            <div class="badges">
+              <span class="pill green">+${goal.points}</span>
+              <span class="pill subtle">${formatDateShort(achievement.date)}</span>
+      </div>
+      </div>
+          <button class="btn small ghost" title="Отменить достижение">✕</button>
+        `;
+        row.querySelector('button').addEventListener('click', () => {
+          state.goalAchievements = state.goalAchievements.filter(a => a.id !== achievement.id);
+          saveState();
+          refreshAll();
+        });
+        historyCard.appendChild(row);
+      });
+
+      container.appendChild(historyCard);
+    }
+  }
+
+  // -------- Anti Tasks Tab (Today Only, Perpetual) --------
+
+  function renderAntiTab() {
+    const container = document.getElementById('tab-anti');
+    container.innerHTML = '';
+
+    // Anti-Vision Card at top
+    const antiVision = localStorage.getItem(ANTI_VISION_KEY);
+    const antiVisionCard = document.createElement('div');
+    antiVisionCard.className = 'vision-card anti';
+    if (antiVision && antiVision.trim()) {
+      antiVisionCard.innerHTML = `
+        <div class="vision-card-label">Твоё антивидение</div>
+        <div class="vision-card-text">"${escapeHtml(antiVision.trim())}"</div>
+      `;
+    } else {
+      antiVisionCard.innerHTML = `
+        <div class="vision-card-label">Твоё антивидение</div>
+        <div class="vision-card-empty">Опиши своё антивидение в Настройки → Видение</div>
+      `;
+    }
+    container.appendChild(antiVisionCard);
+
+    const todayCard = document.createElement('div');
+    todayCard.className = 'card';
+
+    const antiToday = getAntiTasks();
+    const iso = todayISO();
+
+    todayCard.innerHTML = `<div class="section-title"><span class="icon red">⚔</span> Знай своего врага</div>`;
+
+    if (antiToday.length === 0) {
+      todayCard.innerHTML += `<p class="small">Пока нет врагов.</p>`;
+    } else {
+      antiToday.forEach(task => {
+        const row = document.createElement('div');
+        row.className = 'row';
+        row.innerHTML = `
+          <div style="flex:1;">
+            <div style="font-size:14px;font-weight:500;">
+              ${escapeHtml(task.name)}
+            </div>
+            <div class="badges">
+              <span class="pill red">+${task.points}</span>
+            </div>
+          </div>
+          <button class="btn small ghost">Сорвался(лась)</button>
+        `;
+        row.querySelector('button').addEventListener('click', () => {
+          // Add completion
+          state.completions.push({ id:uuid(), taskId:task.id, date: iso });
+          saveState();
+          refreshAll();
+        });
+        todayCard.appendChild(row);
+      });
+    }
+
+    container.appendChild(todayCard);
+
+    // Anti History
+    const todayAntiCompletions = state.completions
+      .filter(c => c.date === iso)
+      .map(c => {
+        const t = state.tasks.find(x => x.id === c.taskId);
+        return { ...c, task: t };
+      })
+      .filter(x => x.task && x.task.type === 'anti');
+
+    if (todayAntiCompletions.length > 0) {
+      const historyCard = document.createElement('div');
+      historyCard.className = 'card';
+      historyCard.innerHTML = `<div class="section-title"><span class="icon red">↩</span> Сегодняшние срывы</div>`;
+      
+      todayAntiCompletions.reverse().forEach(c => {
+        const row = document.createElement('div');
+        row.className = 'row';
+        row.innerHTML = `
+          <div style="flex:1;">
+            <div style="font-size:13px;font-weight:500;color:var(--crimson);">${escapeHtml(c.task.name)}</div>
+            <div class="badges">
+              <span class="pill red">+${c.task.points}</span>
+              <span class="pill subtle">${formatDateShort(c.date)}</span>
+            </div>
+          </div>
+          <button class="btn small ghost" style="padding:4px 8px; min-width:auto;">✕</button>
+        `;
+        const deleteBtn = row.querySelector('button');
+        deleteBtn.addEventListener('click', () => {
+          const idx = state.completions.findIndex(comp => comp.id === c.id);
+          if (idx >= 0) {
+            state.completions.splice(idx, 1);
+          saveState();
+          refreshAll();
+          }
+        });
+        historyCard.appendChild(row);
+      });
+      
+      container.appendChild(historyCard);
+    }
+  }
+
+  // -------- Analytics Tab --------
+
+
+  function renderAnalyticsTab() {
+    const container = document.getElementById('tab-analytics');
+    container.innerHTML = '';
+
+
+    const positives = getPositiveTasks();
+    if (positives.length === 0) {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `<p class="small">Создай хотя бы одну задачу, чтобы начать отслеживать прогресс.</p>`;
+      container.appendChild(card);
+      return;
+    }
+
+    if (!selectedStreakTaskId || !positives.some(t => t.id === selectedStreakTaskId)) {
+      selectedStreakTaskId = positives[0].id;
+    }
+
+    // Get values for overview
+    const { current, best } = calcStreak(selectedStreakTaskId);
+    const todayProgress = getTodaysProgress();
+    const weekRate = getWeekCompletionRate();
+    const antiFreeDays = getAntiFreeDays();
+    const activeDays = getTotalActiveDays();
+    const goalsAchieved = (state.goalAchievements || []).length;
+    const totalGoals = (state.goals || []).length;
+
+    // 1. Overview Cards
+    const analyticsCard = document.createElement('div');
+    analyticsCard.className = 'card';
+    analyticsCard.innerHTML = `<div class="section-title"><span class="icon">↗</span> Твоя статистика</div>`;
+    
+    const grid = document.createElement('div');
+    grid.className = 'analytics-grid';
+
+    // Dynamic color for week rate
+    const weekColor = weekRate >= 80 ? 'var(--emerald)' : weekRate >= 50 ? 'var(--gold)' : 'var(--crimson)';
+    // Today's progress text
+    const todayText = todayProgress.total > 0 
+      ? `${todayProgress.done}/${todayProgress.total}` 
+      : '—';
+    const todayColor = todayProgress.total === 0 ? 'var(--text-dim)' 
+      : todayProgress.done === todayProgress.total ? 'var(--emerald)' 
+      : 'var(--gold)';
+
+    grid.innerHTML = `
+      <div class="analytics-card">
+        <div class="analytics-label">Сегодня</div>
+        <div class="analytics-value" style="color:${todayColor};">${todayText}</div>
+        <div class="analytics-sublabel">${todayProgress.done === todayProgress.total && todayProgress.total > 0 ? '✓ Готово!' : 'задач сделано'}</div>
+      </div>
+      <div class="analytics-card">
+        <div class="analytics-label">За неделю</div>
+        <div class="analytics-value" style="color:${weekColor};">${weekRate}%</div>
+        <div class="analytics-sublabel">выполнение</div>
+      </div>
+      <div class="analytics-card">
+        <div class="analytics-label">Цели</div>
+        <div class="analytics-value" style="color:var(--gold);">${goalsAchieved}${totalGoals > 0 ? '/' + totalGoals : ''}</div>
+        <div class="analytics-sublabel">достигнуто</div>
+      </div>
+      <div class="analytics-card">
+        <div class="analytics-label">Чистая серия</div>
+        <div class="analytics-value" style="color:${antiFreeDays > 0 ? 'var(--emerald)' : 'var(--text-dim)'};">${antiFreeDays}</div>
+        <div class="analytics-sublabel">дней без срывов</div>
+      </div>
+      <div class="analytics-card">
+        <div class="analytics-label">Лучшая серия</div>
+        <div class="analytics-value" style="color:var(--violet);">${best}</div>
+        <div class="analytics-sublabel">дней</div>
+      </div>
+      <div class="analytics-card">
+        <div class="analytics-label">Текущая</div>
+        <div class="analytics-value" style="color:var(--violet);">${current}</div>
+        <div class="analytics-sublabel">дней подряд</div>
+      </div>
+    `;
+    analyticsCard.appendChild(grid);
+    container.appendChild(analyticsCard);
+
+    // 2. Streaks Calendar
+    const streakCard = document.createElement('div');
+    streakCard.className = 'card';
+    streakCard.innerHTML = `<div class="section-title"><span class="icon">🔥</span> Календарь серий</div>`;
+
+    const selectRow = document.createElement('div');
+    selectRow.className = 'calendar-header';
+    const left = document.createElement('div');
+    left.innerHTML = `
+      <div class="small" style="margin-bottom:4px;">Отслеживается</div>
+      <select id="streak-select"></select>
+    `;
+    const right = document.createElement('div');
+    const today = new Date();
+    const monthName = today.toLocaleString('ru-RU', { month:'short' });
+    right.innerHTML = `<span class="pill subtle">${monthName} ${today.getFullYear()}</span>`;
+
+    selectRow.appendChild(left);
+    selectRow.appendChild(right);
+    streakCard.appendChild(selectRow);
+
+    const select = left.querySelector('#streak-select');
+    positives.forEach(t => {
+      const opt = document.createElement('option');
+      opt.value = t.id;
+      opt.textContent = t.name;
+      if (t.id === selectedStreakTaskId) opt.selected = true;
+      select.appendChild(opt);
+    });
+    select.addEventListener('change', () => {
+      selectedStreakTaskId = select.value;
+      renderAnalyticsTab();
+    });
+
+    // weekday header
+    const namesRow = document.createElement('div');
+    namesRow.className = 'calendar';
+    WEEKDAYS.forEach(d => {
+      const el = document.createElement('div');
+      el.className = 'day-name';
+      el.textContent = d[0];
+      namesRow.appendChild(el);
+    });
+    streakCard.appendChild(namesRow);
+
+    const calGrid = document.createElement('div');
+    calGrid.className = 'calendar';
+
+    const year = today.getFullYear();
+    const month = today.getMonth();
+    const first = new Date(year, month, 1);
+    const firstWeekday = first.getDay();
+    const lastDay = new Date(year, month+1, 0).getDate();
+    const todayIso = todayISO();
+
+    const task = state.tasks.find(t => t.id === selectedStreakTaskId);
+    const taskDates = new Set(
+      state.completions
+        .filter(c => c.taskId === selectedStreakTaskId)
+        .map(c => c.date)
+    );
+
+    // empty cells before 1st
+    for (let i=0;i<firstWeekday;i++) {
+      const cell = document.createElement('div');
+      cell.className = 'day-cell off';
+      calGrid.appendChild(cell);
+    }
+
+    for (let day=1; day<=lastDay; day++) {
+      const d = new Date(year, month, day);
+      d.setHours(0,0,0,0);
+      const iso = d.toISOString().slice(0,10);
+      const weekday = d.getDay();
+      const scheduled = task.daysOfWeek.length === 0 || task.daysOfWeek.includes(weekday);
+      const done = taskDates.has(iso);
+
+      let cls = 'day-cell';
+      if (!scheduled) {
+        cls += ' off';
+      } else {
+        if (iso > todayIso) {
+          cls += ' future';
+        } else if (done) {
+          cls += ' done';
+        } else {
+          cls += ' missed';
+        }
+      }
+      if (iso === todayIso) {
+        cls += ' today';
+      }
+
+      const cell = document.createElement('div');
+      cell.className = cls;
+      cell.textContent = day;
+      calGrid.appendChild(cell);
+    }
+
+    streakCard.appendChild(calGrid);
+
+    const footer = document.createElement('div');
+    footer.className = 'streak-footer';
+    footer.innerHTML = `
+      <div><span class="small">Текущая серия</span><br/><strong>${current} дн.</strong></div>
+      <div><span class="small">Лучшая серия</span><br/><strong>${best} дн.</strong></div>
+    `;
+    streakCard.appendChild(footer);
+
+    container.appendChild(streakCard);
+  }
+
+  // -------- Redeemables Tab --------
+
+  function renderRedeemTab() {
+    const container = document.getElementById('tab-redeem');
+    container.innerHTML = '';
+
+    // Recalculate all values fresh
+    const taskPoints = sumPointsByType('positive');
+    const goalPoints = totalGoalPoints();
+    const totalEarned = taskPoints + goalPoints;
+    const anti = sumPointsByType('anti');
+    const offset = totalPunishmentOffset();
+    const redeemed = totalRedeemed();
+
+    // Calculate effective anti points (after punishment offset, capped at anti)
+    const effectiveOffset = Math.min(offset, anti);
+    const effectiveAnti = anti - effectiveOffset;
+    
+    // Points = earned minus spent (what you have before debt)
+    const remainingPoints = totalEarned - redeemed;
+    
+    // Spendable = Points - Debt (math must always balance)
+    const spendable = remainingPoints - effectiveAnti;
+    
+    // For display: determine colors based on values
+    const pointsColor = remainingPoints >= 0 ? 'var(--emerald)' : 'var(--crimson)';
+    const spendableColor = spendable >= 0 ? 'var(--gold)' : 'var(--crimson)';
+
+    // Points Breakdown Card
+    const breakdownCard = document.createElement('div');
+    breakdownCard.className = 'card';
+    breakdownCard.innerHTML = `
+      <div class="section-title"><span class="icon gold">⚖</span> Баланс очков</div>
+      <div class="balance-row">
+        <div class="balance-item main">
+          <div class="balance-item-value" style="color:${pointsColor};">${remainingPoints}</div>
+          <div class="balance-item-label">Очки</div>
+        </div>
+        <div class="balance-operator">−</div>
+        <div class="balance-item">
+          <div class="balance-item-value" style="color:var(--crimson);">${effectiveAnti}</div>
+          <div class="balance-item-label">Долг</div>
+        </div>
+        <div class="balance-operator">=</div>
+        <div class="balance-item main">
+          <div class="balance-item-value" style="color:${spendableColor};">${spendable}</div>
+          <div class="balance-item-label">Доступно</div>
+        </div>
+      </div>
+      ${redeemed > 0 ? `<div class="balance-note">Потрачено ${redeemed} очк. на награды</div>` : ''}
+      ${spendable < 0 ? `<div class="balance-note" style="color:var(--crimson);">Выполняй задачи или погашай долг, чтобы заработать больше!</div>` : ''}
+    `;
+    container.appendChild(breakdownCard);
+
+    // Punishments to claim
+    const punishCard = document.createElement('div');
+    punishCard.className = 'card';
+    punishCard.innerHTML = `<div class="section-title"><span class="icon purple">↺</span> Погасить долг</div>`;
+    const punishments = getPunishmentTasks();
+    
+    // Calculate remaining debt (anti - capped offset)
+    const currentOffset = totalPunishmentOffset();
+    const remainingDebt = Math.max(0, anti - currentOffset);
+    
+    if (punishments.length === 0) {
+      punishCard.innerHTML += `<p class="small">Пока нет штрафов.</p>`;
+    } else if (remainingDebt === 0) {
+      punishCard.innerHTML += `<p class="small" style="color:var(--emerald);">Долгов нет. Ты чист(а)!</p>`;
+      punishments.forEach(task => {
+        const row = document.createElement('div');
+        row.className = 'row';
+        row.style.opacity = '0.5';
+        row.innerHTML = `
+          <div style="flex:1;">
+            <div style="font-size:14px;font-weight:500;">${escapeHtml(task.name)}</div>
+            <div class="badges">
+              <span class="pill violet">−${task.points} долга</span>
+            </div>
+          </div>
+          <button class="btn small" disabled style="opacity:0.5;">Готово</button>
+        `;
+        punishCard.appendChild(row);
+      });
+    } else {
+      punishCard.innerHTML += `<p class="small" style="color:var(--crimson);">У тебя ${remainingDebt} долга к погашению.</p>`;
+      punishments.forEach(task => {
+        const row = document.createElement('div');
+        row.className = 'row';
+        row.innerHTML = `
+          <div style="flex:1;">
+            <div style="font-size:14px;font-weight:500;">${escapeHtml(task.name)}</div>
+            <div class="badges">
+              <span class="pill violet">−${task.points} долга</span>
+            </div>
+          </div>
+          <button class="btn small violet">Готово</button>
+        `;
+        const btn = row.querySelector('button');
+        btn.addEventListener('click', () => {
+          // Re-check debt before allowing completion
+          const currentAnti = sumPointsByType('anti');
+          const currentOff = totalPunishmentOffset();
+          const debt = Math.max(0, currentAnti - currentOff);
+          if (debt === 0) {
+            alert('Нет долга для погашения!');
+            return;
+          }
+          const iso = todayISO();
+          state.completions.push({ id:uuid(), taskId:task.id, date: iso });
+          state.redemptions.push({ 
+            id:uuid(), 
+            type:'punishment',
+            taskId:task.id,
+            name:task.name,
+            cost:task.points,
+            date:iso 
+          });
+          saveState();
+          refreshAll();
+        });
+        punishCard.appendChild(row);
+      });
+    }
+
+    // Rewards & Redemption
+    const listCard = document.createElement('div');
+    listCard.className = 'card';
+    listCard.innerHTML = `<div class="section-title"><span class="icon gold">★</span> Награды</div>`;
+    if (state.rewards.length === 0) {
+      listCard.innerHTML += `<p class="small">Пока нет наград.</p>`;
+    } else {
+      state.rewards.forEach(r => {
+        const row = document.createElement('div');
+        row.className = 'row';
+        const affordable = spendable >= r.cost;
+        row.innerHTML = `
+          <div style="flex:1;">
+            <div style="font-size:14px;font-weight:500;">${escapeHtml(r.name)}</div>
+            <div class="badges">
+              <span class="pill gold">${r.cost} очк.</span>
+            </div>
+          </div>
+          <button class="btn small ${affordable ? '' : 'ghost'}" ${!affordable ? 'disabled' : ''}>
+            ${affordable ? 'Получить' : 'Недостаточно'}
+          </button>
+        `;
+        const btn = row.querySelector('button');
+        btn.addEventListener('click', () => {
+          // Re-check balance at click time to prevent overspending
+          const currentBalance = netPoints();
+          if (currentBalance < r.cost) {
+            alert('Недостаточно очков!');
+            return;
+          }
+          // Add to redemption history
+          state.redemptions.push({ 
+            id:uuid(), 
+            type:'reward',
+            rewardId:r.id, 
+            name:r.name,
+            cost:r.cost, 
+            date:todayISO() 
+          });
+          saveState();
+          refreshAll();
+        });
+        listCard.appendChild(row);
+      });
+    }
+
+    // Redemption History
+    let historyCard = null;
+    if (state.redemptions.length > 0) {
+      historyCard = document.createElement('div');
+      historyCard.className = 'card';
+      historyCard.innerHTML = `<div class="section-title"><span class="icon">↺</span> История</div>`;
+      
+      state.redemptions.slice().reverse().forEach(r => {
+        const row = document.createElement('div');
+        row.className = 'row';
+        let itemName = r.name;
+        if (!itemName) {
+          if (r.type === 'punishment') {
+            const task = state.tasks.find(t => t.id === r.taskId);
+            itemName = task ? task.name : 'Штраф';
+          } else {
+            const reward = state.rewards.find(x => x.id === r.rewardId);
+            itemName = reward ? reward.name : 'Награда';
+          }
+        }
+        const itemType = r.type === 'punishment' ? 'violet' : 'gold';
+        const itemLabel = r.type === 'punishment' ? `-${r.cost} долга` : `-${r.cost} очк.`;
+        
+        row.innerHTML = `
+          <div style="flex:1;">
+            <div style="font-size:13px;font-weight:500;">${escapeHtml(itemName)}</div>
+            <div class="badges">
+              <span class="pill ${itemType}">${itemLabel}</span>
+              <span class="pill subtle">${formatDateShort(r.date)}</span>
+            </div>
+          </div>
+          <button class="btn small ghost" style="padding:4px 8px; min-width:auto;">✕</button>
+        `;
+        const deleteBtn = row.querySelector('button');
+        deleteBtn.addEventListener('click', () => {
+          const idx = state.redemptions.findIndex(red => red.id === r.id);
+          if (idx >= 0) {
+            // If it's a punishment, also remove the completion
+            if (r.type === 'punishment' && r.taskId) {
+              const completionIdx = state.completions.findIndex(c => 
+                c.taskId === r.taskId && c.date === r.date
+              );
+              if (completionIdx >= 0) {
+                state.completions.splice(completionIdx, 1);
+              }
+            }
+            state.redemptions.splice(idx, 1);
+            saveState();
+            refreshAll();
+          }
+        });
+        historyCard.appendChild(row);
+      });
+    }
+
+    container.appendChild(punishCard);
+    container.appendChild(listCard);
+    
+    // History at the bottom
+    if (historyCard) {
+      container.appendChild(historyCard);
+    }
+  }
+
+  // -------- Nav Tabs --------
+
+  function setupTabs() {
+    const tabs = document.querySelectorAll('.nav-tab');
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const name = tab.dataset.tab;
+        ['tasks','goals','anti','analytics','redeem'].forEach(id => {
+          document.getElementById('tab-'+id).style.display = (id === name) ? '' : 'none';
+        });
+      });
+    });
+  }
+
+  // -------- Modal --------
+
+  function setupModal() {
+    const modal = document.getElementById('settings-modal');
+    const openBtn = document.getElementById('settings-btn');
+    const closeBtn = document.getElementById('modal-close');
+
+    openBtn.addEventListener('click', () => {
+      modal.classList.add('active');
+      renderSettings();
+    });
+
+    closeBtn.addEventListener('click', () => {
+      modal.classList.remove('active');
+    });
+
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        modal.classList.remove('active');
+      }
+    });
+  }
+
+
+  function refreshAll() {
+    renderTasksTab();
+    renderGoalsTab();
+    renderAntiTab();
+    renderAnalyticsTab();
+    renderRedeemTab();
+  }
+
+  function initApp() {
+    try {
+      loadState();
+      sanitizeData(); // Clean up any corrupted data
+      setupTabs();
+      setupModal();
+      setupReflectionModal();
+      setupInstallBanner();
+      const positives = getPositiveTasks();
+      if (positives.length) selectedStreakTaskId = positives[0].id;
+      refreshAll();
+      
+      // Check if should show reflection
+      setTimeout(() => {
+        if (shouldShowReflection()) {
+          showReflectionModal();
+        }
+      }, 1000);
+      
+      // Schedule ongoing checks
+      scheduleNotificationCheck();
+    } catch(e) {
+      console.error('Init error:', e);
+    }
+  }
+
+  // Start with onboarding (which leads to PIN lock)
+  setupOnboarding();
+})();
+
+// Register Service Worker for PWA
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js')
+      .then((registration) => {
+        console.log('SW registered:', registration.scope);
+      })
+      .catch((error) => {
+        console.log('SW registration failed:', error);
+      });
+  });
+}
+</script>
+</body>
+</html>
